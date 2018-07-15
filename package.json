@@ -1,0 +1,31 @@
+{
+  "name": "qassistant",
+  "version": "1.0.0",
+  "description": "Helps QAs to have an out-of-the-box environment",
+  "main": "index.js",
+  "scripts": {
+    "test": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luffy1087/qassistant.git"
+  },
+  "keywords": [
+    "QA",
+    "environment",
+    "out-of-the-box",
+    "build",
+    "test",
+    "prepared"
+  ],
+  "author": "Luffy",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/luffy1087/qassistant/issues"
+  },
+  "homepage": "https://github.com/luffy1087/qassistant#readme",
+  "dependencies": {
+    "optimist": "^0.6.1",
+    "readline-sync": "^1.4.9"
+  }
+}
