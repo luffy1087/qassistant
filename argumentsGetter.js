@@ -4,7 +4,7 @@ var readline = require('readline-sync');
 function argumentsGetter() {
     var numberOfArgumets = Object.keys(args).length - 2;
     if (numberOfArgumets == 0) {
-        return void interactiveArgumentsGetter();
+        return interactiveArgumentsGetter();
     }
     //node index.js "-y" "master" "-s" "reasease1" "-n" "moncler" "-p" "Cart,Item"
     return {
@@ -25,4 +25,4 @@ function interactiveArgumentsGetter() {
     return objectArgs;
 }
 
-exports.argumentsGetter = argumentsGetter();
+exports.argumentsGetter = argumentsGetter;
