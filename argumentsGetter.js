@@ -8,19 +8,17 @@ function argumentsGetter() {
     }
     //node index.js "-y" "master" "-s" "reasease1" "-n" "moncler" "-p" "Cart,Item"
     return {
-        yTosBranch: args["y"],
-        storeBranch: args["s"],
-        storeName: args["n"],
-        dll: args["p"]
+        mainProjBranch: args["y"],
+        secondProjBranch: args["s"],
+        secondProjName: args["n"],
+        dlls: args["p"]
     };
 }
 
 function interactiveArgumentsGetter() {
     var objectArgs = {};
-    ['yTosBranch', 'storeBranch', 'storeName', 'dll']
-        .forEach(function(argName) {
-            objectArgs[argName] =  readline.question('Type the argument ' + argName + "\n");
-        });
+    ['mainProjBranch', 'secondProjBranch', 'secondProjName', 'dlls']
+        .forEach(function(argName) { objectArgs[argName] =  readline.question('Type the argument ' + argName + "\n"); });
     
     return objectArgs;
 }
