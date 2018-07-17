@@ -11,13 +11,13 @@ function argumentsGetter() {
         yTosBranch: args["y"],
         storeBranch: args["s"],
         storeName: args["n"],
-        plugins: args["p"]
+        dll: args["p"]
     };
 }
 
 function interactiveArgumentsGetter() {
     var objectArgs = {};
-    ['yTosBranch', 'storeBranch', 'storeName', 'plugins']
+    ['yTosBranch', 'storeBranch', 'storeName', 'dll']
         .forEach(function(argName) {
             objectArgs[argName] =  readline.question('Type the argument ' + argName + "\n");
         });
