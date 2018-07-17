@@ -9,6 +9,7 @@ function startProgram(cfg) {
     executeCommand(stringFormat(patternCmd, cfg.mainProject, args.mainProjBranch));
     //build mainProject
     prepareSecondProject(patternCmd, cfg.secondProject, args.secondProjName, args.secondProjBranch);
+    //buold secondProject
     //fix xml references (set the path for every plugins based on mainProject paths)
 }
 
