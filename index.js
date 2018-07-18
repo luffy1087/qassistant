@@ -1,22 +1,24 @@
 var configuration = require('./configure').configuration;
 var events = configuration.events;
+var executeCommand = require('./commands').executeCommand;
 
 function startProgram(cfg) {
     var args = require('./argumentsGetter').argumentsGetter();
-    var executeCommand = require('./commands').executeCommand;
     var patternCmd = 'cd {0} && git checkout . && git clean -df && git checkout {1} && git pull';
+    var currentPath = executeCommand('cd');
 
     executeCommand(stringFormat(patternCmd, cfg.mainProject, args.mainProjBranch));
     //build mainProject
     prepareSecondProject(patternCmd, cfg.secondProject, args.secondProjName, args.secondProjBranch);
     //buold secondProject
     //fix xml references (set the path for every plugins based on mainProject paths)
+    executeCommand(stringFormat('cd {0}', patternCmd));
 }
 
 function prepareSecondProject(patternCmd, cfgPath, projName, branch) {
     patternCmd = patternCmd.concat(' && rmdir /S /Q packages');
     
-    var rewrittenPath = stringFormat(patternCmd, stringFormat(cfgPath, projName), branch);
+    var rewrittenPath = stringFormat(patternCmd, stringFormat(cfgPath, projName, projName), branch);
     
     executeCommand(rewrittenPath);
 }
