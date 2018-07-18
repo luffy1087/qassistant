@@ -1,8 +1,8 @@
-var fs = require('fs');
-var readline = require('readline-sync');
-var Registry = require('winreg');
-var eventEmitter = require('events');
-var events = new eventEmitter();
+var fs = require('fs'),
+    readline = require('readline-sync'),
+    Registry = require('winreg'),
+    eventEmitter = require('events'),
+    events = new eventEmitter();
 
 function askPath(type, isPattern) {
     do {
@@ -19,35 +19,41 @@ function askPath(type, isPattern) {
 
 function getDevEnvPath() {
     var vsPaths = new Registry({hive: Registry.HKLM, key: '\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\SxS\\VS7'});
-    vsPaths.values(function(err, items) {
-        if (err) {
-            return void console.log('WINREG ERROR: ' + err);
-        }
+    vsPaths.values(onRegistryValues);
+}
 
-        for (var i=0; i < items.length; i++) {
-            var file = items[i].value + 'Common7\\IDE\\devenv.exe';
-            
-            if (!fs.existsSync(file)) { continue; }
+function onRegistryValues(err, items) {
+    if (err) {
+        return void console.log('WINREG ERROR: ' + err);
+    }
 
-            events.emit('onDevPath', file);
+    for (var i=0; i < items.length; i++) {
+        var file = items[i].value + 'Common7\\IDE\\devenv.exe';
+        
+        if (!fs.existsSync(file)) { continue; }
 
-            break;
-        }
-    });
+        events.emit('onDevPath', file);
+
+        return;
+    }
+
+    throw new Error('Devenv not found the registry');
 }
 
 function readyToStart(devenvPath) {
-    var configurationObject = { mainProject: askPath('mainProject'), secondProject: askPath('pattern (e.g: C:\\projects\\{0}\\Src)', true), devenvPath: devenvPath };
+    var json = createConfigurationJson(devenvPath);
 
-    fs.writeFileSync('configure.json', JSON.stringify(configurationObject));
+    fs.writeFileSync('configure.json', JSON.stringify(json));
 
-    events.emit('onStart', configurationObject);
+    events.emit('onStart', json);
 }
 
-function createConfiguration() {
-    events.once('onDevPath', readyToStart);
-
-    getDevEnvPath();
+function createConfigurationJson(devenvPath) {
+    return {
+        mainProject: askPath('mainProject'),
+        secondProject: askPath('pattern (e.g: C:\\projects\\{0}\\Src)', true),
+        devenvPath: devenvPath
+    };
 }
 
 function getConfig() {
@@ -55,7 +61,8 @@ function getConfig() {
         return void events.emit('onStart', require('./configure.json'));
     }
     
-    createConfiguration();
+    events.once('onDevPath', readyToStart);
+    getDevEnvPath();
 }
 
 exports.configuration = { getConfig, events: events };
