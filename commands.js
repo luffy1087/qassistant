@@ -6,5 +6,5 @@ function printOutput(error, stdout, stderr) {
 }
 
 exports.executeCommand = function(cmd) {
-  exec(cmd, printOutput);
+  exec(cmd.replace(/\.exe/i, ''), printOutput);
 }

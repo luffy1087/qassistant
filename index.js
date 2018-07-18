@@ -1,18 +1,19 @@
 var configuration = require('./configure').configuration;
 var events = configuration.events;
 var executeCommand = require('./commands').executeCommand;
+var glob = require('glob');
 
 function startProgram(cfg) {
-    var args = require('./argumentsGetter').argumentsGetter();
-    var patternCmd = 'cd {0} && git checkout . && git clean -df && git checkout {1} && git pull';
-    var currentPath = executeCommand('cd');
+    // var args = require('./argumentsGetter').argumentsGetter();
+    // var patternCmd = 'cd {0} && git checkout . && git clean -df && git checkout {1} && git pull';
+    // var currentPath = executeCommand('cd');
 
-    executeCommand(stringFormat(patternCmd, cfg.mainProject, args.mainProjBranch));
-    //build mainProject
-    prepareSecondProject(patternCmd, cfg.secondProject, args.secondProjName, args.secondProjBranch);
+    //executeCommand(stringFormat(patternCmd, cfg.mainProject, args.mainProjBranch));
+    build(cfg.mainProject, cfg.devenvPath);
+    //prepareSecondProject(patternCmd, cfg.secondProject, args.secondProjName, args.secondProjBranch);
     //buold secondProject
     //fix xml references (set the path for every plugins based on mainProject paths)
-    executeCommand(stringFormat('cd {0}', patternCmd));
+    //executeCommand(stringFormat('cd {0}', patternCmd));
 }
 
 function prepareSecondProject(patternCmd, cfgPath, projName, branch) {
@@ -23,9 +24,12 @@ function prepareSecondProject(patternCmd, cfgPath, projName, branch) {
     executeCommand(rewrittenPath);
 }
 
-function stringFormat() {
+function build(path, devEnv) {
+    var projectFile = glob.sync(stringFormat('{0}/*.sln', path))[0];
+    executeCommand(stringFormat('"{0}" {1} /rebuild', devEnv, projectFile));
+}
 
-    console.log(arguments);
+function stringFormat() {
     var str = arguments[0];
     if (arguments.length == 1) { return str; }
 
