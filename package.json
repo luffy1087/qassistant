@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/luffy1087/qassistant#readme",
   "dependencies": {
+    "async": "^2.6.1",
     "events": "^3.0.0",
     "glob": "^7.1.2",
     "optimist": "^0.6.1",

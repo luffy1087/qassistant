@@ -1,17 +1,33 @@
 var executeCommand = require('./commands').executeCommand;
     utils = require('./utils').utils,
     glob = require('glob'),
-    currentPath = executeCommand('cd').stdout;
+    async = require('async');
 
 function changeDir(path) {
-    var strCmd = utils.strFormat('cd {0}', path);
-    executeCommand(strCmd);
+    return executeCommand(utils.strFormat('cd {0}', path));
+}
+
+function gitCleanChanges() {
+    return executeCommand('git', 'checkout', '.');
+}
+
+function gitCleanDirectory() {
+    return executeCommand('git', 'clean', '-df');
+}
+
+function gitSwitchBranch(branch) {
+    return executeCommand('git', 'checkout', branch);
+}
+
+function gitPull() {
+    return executeCommand('git', 'pull');
 }
 
 function gitTasks(path, branch) {
     var gitCmdPattern = 'cd {0} && git checkout . && git clean -df && git checkout {1} && git pull';
     var strCmd = utils.strFormat(gitCmdPattern, path, branch);
-    executeCommand(strCmd);
+    
+    return executeCommand(strCmd);
 }
 
 function cleanPackages() {
@@ -20,12 +36,14 @@ function cleanPackages() {
 
 function build(devenv, project) {
     var strCmd = utils.strFormat('"{0}" {1} /rebuild', devenv, project);
-    executeCommand(strCmd);
+    
+    return executeCommand(strCmd);
 }
 
 function restorePackages(path) {
     var strCmd = utils.strFormat('nuget restore {0}', path);
-    executeCommand(strCmd);
+    
+    return executeCommand(strCmd);
 }
 
 function getProjectFilePath(path) {
@@ -37,18 +55,41 @@ function getProjectFilePath(path) {
     throw new Error('Error: Project not found in ' + path);
 }
 
-function prepareFirstEnvironment(path, branch, devenv) {
-    gitTasks(path, branch);
-
-    build(devenv, getProjectFilePath(path));
+function resolveCallback(task) {
+    var args = Array.prototype.slice.call(arguments, 1);
+   
+    return function(resolve) {
+        var childProcess = task.apply(this, args);
+        
+        childProcess.stdout.on('end', function(stream) { resolve(); });
+    }
 }
 
-function prepareSecondEnvironment(path, branch) {
-    changeDir(path);
-    gitTasks(branch);
-    cleanPackages();
-    restorePackages(path);
-    build(devenv, getProjectFilePath(path));
+function prepareFirstEnvironment(path, branch, devenv) {
+    async.series([
+        resolveCallback(changeDir, path),
+        resolveCallback(gitCleanChanges),
+        resolveCallback(gitCleanDirectory),
+        resolveCallback(gitSwitchBranch, branch),
+        resolveCallback(gitPull),
+        resolveCallback(gitCleanDirectory),
+        //resolveCallback(build, devenv, getProjectFilePath(path))
+    ]);
+}
+
+function prepareSecondEnvironment(path, branch, devenv) {
+    async.series([
+        resolveCallback(changeDir, path),
+        resolveCallback(gitCleanChanges),
+        resolveCallback(gitCleanDirectory),
+        resolveCallback(gitSwitchBranch, branch),
+        resolveCallback(gitPull),
+        resolveCallback(gitCleanDirectory),
+        resolveCallback(build, devenv, getProjectFilePath(path)),
+        //cleanPackages();
+        //restorePackages(path);
+        resolveCallback(build, devenv, getProjectFilePath(path))
+    ]);
 }
 
 exports.prepareEnv = {
