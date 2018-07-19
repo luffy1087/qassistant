@@ -1,18 +1,18 @@
 var executeCommand = require('./commands').executeCommand;
-    utils = require('./utils'),
+    utils = require('./utils').utils,
     glob = require('glob'),
     currentPath = executeCommand('cd').stdout;
 
 function changeDir(path) {
     var strCmd = utils.strFormat('cd {0}', path);
-   
+    console.log(strCmd);
     executeCommand(strCmd);
 }
 
 function gitTasks(branch) {
     var gitCmdPattern = 'git checkout . && git clean -df && git checkout {0} && git pull';
     var strCmd = utils.strFormat(gitCmdPattern, branch);
-    
+    console.log(strCmd);
     executeCommand(strCmd);
 }
 
@@ -22,13 +22,13 @@ function cleanPackages() {
 
 function build(devenv, project) {
     var strCmd = utils.strFormat('"{0}" {1} /rebuild', devenv, project);
-
+    console.log(strCmd);
     executeCommand(strCmd, true);
 }
 
 function restorePackages(path) {
     var strCmd = utils.stringFormat('nuget restore {0}', path);
-
+    console.log(strCmd);
     executeCommand(strCmd);
 }
 

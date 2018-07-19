@@ -1,5 +1,5 @@
 var configuration = require('./configure').configuration,
-    prapareEnv = require('./prepareEnv'),
+    prepareEnv = require('./prepareEnv').prepareEnv,
     utils = require('./utils').utils,
     events = configuration.events;
 
