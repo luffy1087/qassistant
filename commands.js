@@ -5,15 +5,18 @@ function printOutput(error, stdout, stderr) {
   if (error) {
     console.log(error);
   }
+
+  if (stderr) {
+    console.log(stderr);
+  }
+  
   console.log(stdout);
 }
 
-exports.executeCommand = function(cmd, isLongProcess) {
-  var childProcess = exec(cmd.replace(/\.exe/i, ''));
+exports.executeCommand = function(cmd) {
+  var childProcess = exec(cmd.replace(/\.exe/i, ''), printOutput);
 
-  if (isLongProcess) {
-    childProcess.stdout.on("data", function(buffer) { console.log(buffer); });
-  }
+  childProcess.stdout.on("data", function(buffer) { console.log(buffer); });
 
   return childProcess;
 }

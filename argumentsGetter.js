@@ -6,7 +6,7 @@ function argumentsGetter() {
     if (numberOfArgumets == 0) {
         return interactiveArgumentsGetter();
     }
-    //node index.js "-y" "master" "-s" "reasease1" "-n" "moncler" "-p" "Cart,Item"
+    //node index.js "-y" "development" "-s" "master" "-n" "VALENTINO" "-p" "Cart,Item"
     return {
         mainProjBranch: args["y"],
         secondProjBranch: args["s"],
