@@ -21,15 +21,21 @@ function spawn(cmd) {
   return childProcess;
 }
 
-function exec(cmd) {
-  process.exec(cmd, function(err, stdout, stderr) {
-    if (err) { console.log(err); }
+function onExecutionFinished(err, stdout, stderr) {
+  if (err) {  
+    console.log(err);
+  }
 
-    if (stdout) { console.log(stdout); }
-  });
+  if (stdout) {
+    console.log(stdout);
+  }
 }
 
-exports.process = {
+function exec(cmd, onExecutionFinished) {
+  process.exec(cmd, onExecutionFinished);
+}
+
+exports.commands = {
   spawn: spawn,
   exec: exec
 };
