@@ -22,17 +22,23 @@ function spawn(cmd) {
 }
 
 function onExecutionFinished(err, stdout, stderr) {
-  if (err) {  
-    console.log(err);
-  }
 
-  if (stdout) {
-    console.log(stdout);
-  }
 }
 
-function exec(cmd, onExecutionFinished) {
-  process.exec(cmd, onExecutionFinished);
+function exec(cmd, resolve) {
+  process.exec(cmd, function(err, stdout, stderr) {
+    if (err) {  
+      console.log(err);
+    }
+  
+    if (stdout) {
+      console.log(stdout);
+    }
+
+    if (resolve) {
+      resolve();
+    }
+  });
 }
 
 exports.commands = {

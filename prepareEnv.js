@@ -8,19 +8,19 @@ function changeDir(path) {
 }
 
 function gitCleanChanges() {
-    return commands.exec('git', 'checkout', '.');
+    return commands.exec('git checkout .');
 }
 
 function gitCleanDirectory() {
-    return commands.exec('git', 'clean', '-df');
+    return commands.exec('git clean -df');
 }
 
 function gitSwitchBranch(branch) {
-    return commands.exec('git', 'checkout', branch);
+    return commands.exec(utils.strFormat('git checkout {0}', branch));
 }
 
 function gitPull() {
-    return commands.exec('git', 'pull');
+    return commands.exec('git pull');
 }
 
 function gitTasks(path, branch) {
@@ -66,7 +66,11 @@ function resolveCallback(task) {
 }
 
 function execTask(task) {
-    
+    var args = Array.prototype.slice.call(arguments, 1);
+   
+    return function(resolve) {
+        task();
+    }
 }
 
 function prepareFirstEnvironment(path, branch, devenv) {
