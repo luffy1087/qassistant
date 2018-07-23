@@ -7,6 +7,10 @@ function changeDirCmd(path) {
     return utils.strFormat('cd {0}', path);
 }
 
+function gitSwitchBranchCmd(branch) {
+    return utils.strFormat('git checkout {0}', branch);
+}
+
 function gitCleanChangesCmd() {
     return 'git checkout .';
 }
@@ -15,8 +19,8 @@ function gitCleanDirectoryCmd() {
     return 'git clean -df';
 }
 
-function gitSwitchBranchCmd(branch) {
-    return utils.strFormat('git checkout {0}', branch);
+function gitResetCmd() {
+    return 'git reset --hard'
 }
 
 function gitPullCmd() {
@@ -32,10 +36,10 @@ function buildCmd(devenv, project) {
 }
 
 function restorePackagesCmd(path) {
-    return utils.strFormat('nuget restore {0}', path);
+    return utils.strFormat('"{0}/nuget" restore {1}', process.cwd(), path);
 }
 
-function getProjectFilePath(path) {
+function getSolutionFile(path) {
     var files = glob.sync(utils.strFormat('{0}/*.sln', path));
     if (files && files.length == 1) {
         return files[0];
@@ -65,10 +69,11 @@ function prepareFirstEnvironment(path, branch, devenv) {
         execTask(changeDirCmd, path),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
-        execTask(gitSwitchBranchCmd, branch),
+        execTask(gitResetCmd),
+        execTask(gitSwitchBranchCmd, branch),//Update to origin (not local)
         execTask(gitPullCmd),
-        execTask(gitCleanDirectoryCmd),
-        //spawnTask(buildCmd, devenv, getProjectFilePath(path))
+        spawnTask(restorePackagesCmd, path),
+        spawnTask(buildCmd, devenv, getSolutionFile(path))
         //onFinishedSeries
     ]);
 }
@@ -78,12 +83,14 @@ function prepareSecondEnvironment(path, branch, devenv) {
         execTask(changeDirCmd, path),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
+        execTask(gitResetCmd),
         execTask(gitSwitchBranchCmd, branch),
         execTask(gitPullCmd),
         execTask(gitCleanDirectoryCmd),
-        //cleanPackagesCmd(); //exec
-        //restorePackagesCmd(path); //spawn
-        spawnTask(build, devenv, getProjectFilePath(path))
+        execTask(cleanPackagesCmd),
+        spawnTask(restorePackagesCmd, path),
+        spawnTask(build, devenv, getSolutionFile(path))
+        //xml parser
         //onFinishedSeries
     ]);
 }
