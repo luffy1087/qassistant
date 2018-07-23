@@ -23,7 +23,7 @@ function spawn(cmdString, callback) {
 }
 
 function exec(cmdString, callback) {
-  var executedProcess = process.exec(cmd, function(err, stdout, stderr) {
+  var executedProcess = process.exec(cmdString, function(err, stdout, stderr) {
     if (err) {  
       console.log(err);
     }
