@@ -69,6 +69,7 @@ function prepareFirstEnvironment(path, branch, devenv) {
         execTask(gitPullCmd),
         execTask(gitCleanDirectoryCmd),
         //spawnTask(buildCmd, devenv, getProjectFilePath(path))
+        //onFinishedSeries
     ]);
 }
 
@@ -83,6 +84,7 @@ function prepareSecondEnvironment(path, branch, devenv) {
         //cleanPackagesCmd(); //exec
         //restorePackagesCmd(path); //spawn
         spawnTask(build, devenv, getProjectFilePath(path))
+        //onFinishedSeries
     ]);
 }
 
