@@ -1,32 +1,29 @@
 var process = require('child_process');
 
 
-function spawn(cmd) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  console.log(args);
-  console.log(cmd.replace(/\.exe/i, ''));
-  //var childProcess = spawn(cmd.replace(/\.exe/i, ''));
-  var childProcess = process.spawn('pwd');
+function spawn(cmdString, callback) {
+  var cmdInfo = cmdString.split(" ");
+  var cmd = cmdString[0].trim().replace(/\.exe$/i, '');
+  var cmdOptions = cmdInfo.slice(1).map(function(value) { return value.trim(); });
+  var spawnedProcess = process.spawn(cmd, cmdOptions);
 
-  childProcess.stdout.on('data', function(stream) {
-      console.log(stream.toString());
-  });
+  spawnedProcess.stdout.on('data', function(stream) { console.log(stream.toString()); });
 
-  childProcess.on('exit', function(code) {
+  spawnedProcess.on('exit', function(code) {
       if (code != 0) {
-          console.log('Failed: ' + code);
+        throw new Exception('Failed: ' + code);
+      }
+
+      if (callback) {
+        callback();
       }
   });
 
-  return childProcess;
+  return spawnedProcess;
 }
 
-function onExecutionFinished(err, stdout, stderr) {
-
-}
-
-function exec(cmd, resolve) {
-  process.exec(cmd, function(err, stdout, stderr) {
+function exec(cmdString, callback) {
+  var executedProcess = process.exec(cmd, function(err, stdout, stderr) {
     if (err) {  
       console.log(err);
     }
@@ -35,10 +32,12 @@ function exec(cmd, resolve) {
       console.log(stdout);
     }
 
-    if (resolve) {
-      resolve();
+    if (callback) {
+      callback();
     }
   });
+
+  return executedProcess;
 }
 
 exports.commands = {

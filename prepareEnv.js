@@ -3,47 +3,36 @@ var commands = require('./commands').commands;
     glob = require('glob'),
     async = require('async');
 
-function changeDir(path) {
-    return commands.exec(utils.strFormat('cd {0}', path));
+function changeDirCmd(path) {
+    return utils.strFormat('cd {0}', path);
 }
 
-function gitCleanChanges() {
-    return commands.exec('git checkout .');
+function gitCleanChangesCmd() {
+    return 'git checkout .';
 }
 
-function gitCleanDirectory() {
-    return commands.exec('git clean -df');
+function gitCleanDirectoryCmd() {
+    return 'git clean -df';
 }
 
-function gitSwitchBranch(branch) {
-    return commands.exec(utils.strFormat('git checkout {0}', branch));
+function gitSwitchBranchCmd(branch) {
+    return utils.strFormat('git checkout {0}', branch);
 }
 
-function gitPull() {
-    return commands.exec('git pull');
+function gitPullCmd() {
+    return 'git pull';
 }
 
-function gitTasks(path, branch) {
-    var gitCmdPattern = 'cd {0} && git checkout . && git clean -df && git checkout {1} && git pull';
-    var strCmd = utils.strFormat(gitCmdPattern, path, branch);
-    
-    return commands.exec(strCmd);
+function cleanPackagesCmd() {
+    return 'rmdir /S /Q packages';
 }
 
-function cleanPackages() {
-    commands.exec('rmdir /S /Q packages');
+function buildCmd(devenv, project) {
+    return utils.strFormat('"{0}" {1} /rebuild', devenv, project);
 }
 
-function build(devenv, project) {
-    var strCmd = utils.strFormat('"{0}" {1} /rebuild', devenv, project);
-    
-    return commands.spawn(strCmd);
-}
-
-function restorePackages(path) {
-    var strCmd = utils.strFormat('nuget restore {0}', path);
-    
-    return commands.spawn(strCmd);
+function restorePackagesCmd(path) {
+    return utils.strFormat('nuget restore {0}', path);
 }
 
 function getProjectFilePath(path) {
@@ -55,48 +44,45 @@ function getProjectFilePath(path) {
     throw new Error('Error: Project not found in ' + path);
 }
 
-function resolveCallback(task) {
+function spawnTask(getCommand) {
     var args = Array.prototype.slice.call(arguments, 1);
    
-    return function(resolve) {
-        var childProcess = task.apply(this, args);
-        
-        childProcess.stdout.on('end', function(stream) { resolve(); });
+    return function(resolveTask) {
+        commands.spawn(getCommand.apply(this, args), resolveTask);
     }
 }
 
-function execTask(task) {
+function execTask(getCommand) {
     var args = Array.prototype.slice.call(arguments, 1);
-   
-    return function(resolve) {
-        task();
+
+    return function(resolveTask) {
+        commands.exec(getCommand.apply(this, args), resolveTask);
     }
 }
 
 function prepareFirstEnvironment(path, branch, devenv) {
     async.series([
-        resolveCallback(changeDir, path),
-        resolveCallback(gitCleanChanges),
-        resolveCallback(gitCleanDirectory),
-        resolveCallback(gitSwitchBranch, branch),
-        resolveCallback(gitPull),
-        resolveCallback(gitCleanDirectory),
-        //resolveCallback(build, devenv, getProjectFilePath(path))
+        execTask(changeDirCmd, path),
+        execTask(gitCleanChangesCmd),
+        execTask(gitCleanDirectoryCmd),
+        execTask(gitSwitchBranchCmd, branch),
+        execTask(gitPullCmd),
+        execTask(gitCleanDirectoryCmd),
+        //spawnTask(buildCmd, devenv, getProjectFilePath(path))
     ]);
 }
 
 function prepareSecondEnvironment(path, branch, devenv) {
     async.series([
-        resolveCallback(changeDir, path),
-        resolveCallback(gitCleanChanges),
-        resolveCallback(gitCleanDirectory),
-        resolveCallback(gitSwitchBranch, branch),
-        resolveCallback(gitPull),
-        resolveCallback(gitCleanDirectory),
-        resolveCallback(build, devenv, getProjectFilePath(path)),
-        //cleanPackages();
-        //restorePackages(path);
-        resolveCallback(build, devenv, getProjectFilePath(path))
+        execTask(changeDirCmd, path),
+        execTask(gitCleanChangesCmd),
+        execTask(gitCleanDirectoryCmd),
+        execTask(gitSwitchBranchCmd, branch),
+        execTask(gitPullCmd),
+        execTask(gitCleanDirectoryCmd),
+        //cleanPackagesCmd(); //exec
+        //restorePackagesCmd(path); //spawn
+        spawnTask(build, devenv, getProjectFilePath(path))
     ]);
 }
 
