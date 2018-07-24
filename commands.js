@@ -1,17 +1,17 @@
-var process = require('child_process');
+var childProcess = require('child_process');
 
 
-function spawn(cmdString, callback) {
-  var cmdInfo = cmdString.split(" ");
-  var cmd = cmdString[0].trim().replace(/\.exe$/i, '');
-  var cmdOptions = cmdInfo.slice(1).map(function(value) { return value.trim(); });
-  var spawnedProcess = process.spawn(cmd, cmdOptions);
+function spawn(cmd, options, callback) {
+  var correctCmd = cmd.replace(/\.exe/i, '').trim();
+  var spawnedProcess = childProcess.spawn(correctCmd, options);
 
-  spawnedProcess.stdout.on('data', function(stream) { console.log(stream.toString()); });
+  spawnedProcess.stdout.on('data',function(stream) {
+    console.log(stream.toString());
+  });
 
   spawnedProcess.on('exit', function(code) {
       if (code != 0) {
-        throw new Exception('Failed: ' + code);
+        console.log(code);
       }
 
       if (callback) {
@@ -19,11 +19,15 @@ function spawn(cmdString, callback) {
       }
   });
 
+  spawnedProcess.on('error', function(error) {
+    console.log(error);
+  });
+
   return spawnedProcess;
 }
 
 function exec(cmdString, callback) {
-  var executedProcess = process.exec(cmdString, function(err, stdout, stderr) {
+  var executedProcess = childProcess.exec(cmdString, function(err, stdout, stderr) {
     if (err) {  
       console.log(err);
     }
