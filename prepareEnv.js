@@ -37,7 +37,7 @@ function gitPullCmd() {
 }
 
 function cleanPackagesCmd() {
-    return 'rmdir /S /Q ..\\packages';
+    return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder('packages'));
 }
 
 function buildCmd(devenv, project) {
