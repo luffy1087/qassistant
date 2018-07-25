@@ -4,10 +4,10 @@ var fs = require('fs'),
     eventEmitter = require('events'),
     events = new eventEmitter();
 
-function askPath(type, isPattern) {
+function askPath(type) {
     do {
         var path = readline.question('type the full path of the ' + type + '\n');
-        if (!isPattern && !fs.existsSync(path)) {
+        if (!path.match(/\{0\}/) && !fs.existsSync(path)) {
             console.log('The path does not exist');
             continue;
         }
@@ -50,8 +50,8 @@ function readyToStart(devenvPath) {
 
 function createConfigurationJson(devenvPath) {
     return {
-        mainProject: askPath('mainProject'),
-        secondProject: askPath('pattern (e.g: C:\\projects\\{0}\\Src)', true),
+        mainProjectPath: askPath('mainProjectPath'),
+        patternOrPath: askPath('pattern or path (e.g: C:\\projects\\{0}\\Src)'),
         devenvPath: devenvPath
     };
 }

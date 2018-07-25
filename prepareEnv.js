@@ -74,7 +74,20 @@ function execTask(getCommand) {
 
 function nodeTask(callback) {
     var args = Array.prototype.slice.call(arguments, 1);
-    console.log(args);
+
+    return function(resolveTask) {
+        callback.apply(this, args);
+        resolveTask();
+    }
+}
+
+function taskOrDefault(shouldRun, callback) {
+    if (!shouldRun) {
+        return function(resolveTask) { resolveTask(); };
+    }
+    
+    var args = Array.prototype.slice.call(arguments, 1);
+    
     return function(resolveTask) {
         callback.apply(this, args);
         resolveTask();
@@ -82,13 +95,16 @@ function nodeTask(callback) {
 }
 
 function prepareFirstEnvironment(path, branch, devenv) {
+    var obj = {path: path, branch: branch, devenv };
+    //one argument { path: path, branch: branch, devenv }
     async.series([
         nodeTask(changeDir, path),
         execTask(gitResetCmd),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
         execTask(gitSwitchBranchCmd, branch),//Update to origin (not local)
-        execTask(gitPruneLocalCmd),
+        taskOrDefault(obj.canCleanPackages, cleanPackagesCmd),
+        //execTask(gitPruneLocalCmd),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', path]),
         spawnTask(devenv, [getSolutionFile(path), "/rebuild"])
