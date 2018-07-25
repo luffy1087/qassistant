@@ -51,7 +51,7 @@ function readyToStart(devenvPath) {
 function createConfigurationJson(devenvPath) {
     return {
         mainProjectPath: askPath('mainProjectPath'),
-        patternOrPath: askPath('pattern or path (e.g: C:\\projects\\{0}\\Src)'),
+        patternOrPath: askPath('patternOrPath (e.g: C:\\projects\\{0}\\Src)'),
         devenvPath: devenvPath
     };
 }

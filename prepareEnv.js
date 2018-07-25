@@ -2,7 +2,7 @@ var commands = require('./commands').commands;
     utils = require('./utils').utils,
     glob = require('glob'),
     async = require('async'),
-    Path = require('path'),
+    pathResolver = require('path'),
     currentPath = process.cwd();
 
 var c = require('child_process');
@@ -37,7 +37,7 @@ function gitPullCmd() {
 }
 
 function cleanPackagesCmd() {
-    return 'rmdir /S /Q packages';
+    return 'rmdir /S /Q ..\\packages';
 }
 
 function buildCmd(devenv, project) {
@@ -51,7 +51,7 @@ function restorePackagesCmd(path) {
 function getSolutionFile(path) {
     var files = glob.sync(utils.strFormat('{0}\\*.sln', path));
     if (files && files.length == 1) {
-        return Path.resolve(files[0]);
+        return pathResolver.resolve(files[0]);
     }
 
     throw new Error('Error: Project not found in ' + path);
@@ -81,17 +81,22 @@ function nodeTask(callback) {
     }
 }
 
-function taskOrDefault(shouldRun, callback) {
+function taskOrDefault(shouldRun, getCommand) {
     if (!shouldRun) {
         return function(resolveTask) { resolveTask(); };
     }
     
-    var args = Array.prototype.slice.call(arguments, 1);
+    var args = Array.prototype.slice.call(arguments, 2);
     
-    return function(resolveTask) {
-        callback.apply(this, args);
-        resolveTask();
+    return execTask(getCommand, args);
+}
+
+function getSecondEnvironmentPath(patternOrPath, placeholderValueOrEmpty) {
+    if (placeholderValueOrEmpty && !!patternOrPath.match(/\{0\}/)) {
+        return utils.getPathByPattern(patternOrPath, placeholderValueOrEmpty, placeholderValueOrEmpty);
     }
+
+    return patternOrPath;
 }
 
 function prepareFirstEnvironment(args) {
@@ -102,7 +107,6 @@ function prepareFirstEnvironment(args) {
         execTask(gitCleanDirectoryCmd),
         execTask(gitSwitchBranchCmd, args.mainRepoBranch),//Update to origin (not local)
         taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd),
-        //execTask(gitPruneLocalCmd),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.mainProjectPath]),
         spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"])
@@ -110,13 +114,14 @@ function prepareFirstEnvironment(args) {
     ]);
 }
 
-function prepareSecondEnvironment(path, branch, devenv) {
+function prepareSecondEnvironment(args) {
+    var path =  getSecondEnvironmentPath(args.patternOrPath, args.placeholderValueOrEmpty);
     async.series([
         nodeTask(changeDir, path),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
         execTask(gitResetCmd),
-        execTask(gitSwitchBranchCmd, branch),
+        execTask(gitSwitchBranchCmd, args.repoBranch),
         execTask(gitPullCmd),
         execTask(gitCleanDirectoryCmd),
         execTask(cleanPackagesCmd),
