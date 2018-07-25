@@ -94,20 +94,18 @@ function taskOrDefault(shouldRun, callback) {
     }
 }
 
-function prepareFirstEnvironment(path, branch, devenv) {
-    var obj = {path: path, branch: branch, devenv };
-    //one argument { path: path, branch: branch, devenv }
+function prepareFirstEnvironment(args) {
     async.series([
-        nodeTask(changeDir, path),
+        nodeTask(changeDir, args.mainProjectPath),
         execTask(gitResetCmd),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
-        execTask(gitSwitchBranchCmd, branch),//Update to origin (not local)
-        taskOrDefault(obj.canCleanPackages, cleanPackagesCmd),
+        execTask(gitSwitchBranchCmd, args.mainRepoBranch),//Update to origin (not local)
+        taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd),
         //execTask(gitPruneLocalCmd),
         execTask(gitPullCmd),
-        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', path]),
-        spawnTask(devenv, [getSolutionFile(path), "/rebuild"])
+        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.mainProjectPath]),
+        spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"])
         //onFinishedSeries
     ]);
 }
