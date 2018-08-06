@@ -16,7 +16,8 @@ function getPathByPattern(pattern, value) {
 
     if (fs.existsSync(path)) { return path; }
 
-    throw new Error('Path ' + path + ' does not exist');
+    console.log(path);
+    throw new Error('Path does not exist');
 }
 
 function searchForFolder(filePath, folderName) {
@@ -28,7 +29,7 @@ function searchForFolder(filePath, folderName) {
         }
     }
 
-    throw new Error('No ' + currentPath + 'found!');
+    console.log('WARNING: searchForFolder did not find any folder');
 }
 
 exports.utils = {

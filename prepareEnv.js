@@ -3,6 +3,7 @@ var commands = require('./commands').commands;
     glob = require('glob'),
     async = require('async'),
     pathResolver = require('path'),
+    jsDOM = require('jsdom'),
     currentPath = process.cwd();
 
 function changeDir(path) {
@@ -88,6 +89,10 @@ function getSecondEnvironmentPath(patternOrPath, placeholderValueOrEmpty) {
     return patternOrPath;
 }
 
+function onFirstEnvironmentFinished(args) {
+    args.events.emit('onFirstEnvironmentFinished', args);
+}
+
 function prepareFirstEnvironment(args) {
     async.series([
         nodeTask(changeDir, args.mainProjectPath),
@@ -98,24 +103,23 @@ function prepareFirstEnvironment(args) {
         taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd.bind(this, args.mainProjectPath)),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.mainProjectPath]),
-        spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"])
-        //onFinishedSeries
+        spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"]),
+        onFirstEnvironmentFinished.bind(this, args)
     ]);
 }
 
 function prepareSecondEnvironment(args) {
-    var path =  getSecondEnvironmentPath(args.patternOrPath, args.placeholderValueOrEmpty);
+    var path = getSecondEnvironmentPath(args.patternOrPath, args.placeholderValueOrEmpty);
     async.series([
         nodeTask(changeDir, path),
+        execTask(gitResetCmd),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
-        execTask(gitResetCmd),
         execTask(gitSwitchBranchCmd, args.repoBranch),
+        taskOrDefault(true, cleanPackagesCmd.bind(this, path)),
         execTask(gitPullCmd),
-        execTask(gitCleanDirectoryCmd),
-        execTask(cleanPackagesCmd),
-        spawnTask(restorePackagesCmd, path),
-        spawnTask(build, devenv, getSolutionFile(path))
+        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', path]),
+        spawnTask(args.devenvPath, [getSolutionFile(path), "/rebuild"])
         //xml parser
         //onFinishedSeries
     ]);
@@ -124,4 +128,4 @@ function prepareSecondEnvironment(args) {
 exports.prepareEnv = {
     prepareFirstEnvironment: prepareFirstEnvironment,
     prepareSecondEnvironment: prepareSecondEnvironment
-};
+}

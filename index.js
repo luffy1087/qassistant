@@ -1,18 +1,14 @@
 var configuration = require('./configure').configuration,
-    prepareEnv = require('./prepareEnv').prepareEnv,
     extend = require('extend'),
+    prepareEnvs = require('./prepareEnv').prepareEnv
     events = configuration.events;
 
 function startProgram(cfg) {
     var args = require('./argumentsGetter').argumentsGetter(cfg);
-    var wholeObject = extend({}, cfg, args);
-    console.log(wholeObject);
-    prepareEnv.prepareFirstEnvironment(wholeObject);
-    //prepareEnv.prepareSecondEnvironment(secondProjPath, args.secondProjBranch);
-    // //fix xml references (set the path for every plugins based on mainProject paths)
-    // //executeCommand(stringFormat('cd {0}', patternCmd));
+    var wholeObject = extend({ events: events }, cfg, args);
+    prepareEnvs.prepareFirstEnvironment(wholeObject);
 }
 
-events.on('onStart', startProgram);
-
+events.once('onStart', startProgram);
+events.once('onFirstEnvironmentFinished', function(wholeObject) { prepareEnvs.prepareSecondEnvironment(wholeObject); });
 configuration.getConfig();
