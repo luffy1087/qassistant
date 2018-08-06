@@ -19,15 +19,16 @@ function getPathByPattern(pattern, value) {
     throw new Error('Path ' + path + ' does not exist');
 }
 
-function searchForFolder(folderName) {
-    var currentPath = process.cwd().split('\\');
-    for (var i = currentPath.length-1, folderToSearch; i >= 0; i--) {
-        folderToSearch = strFormat('{0}\\{1}', currentPath.slice(0, i).join('\\'), folderName);
-        if (fs.existsSync(folderToSearch)) {
-            return searchForFolder;
+function searchForFolder(filePath, folderName) {
+    var currentPath = strFormat('{0}\\{1}', filePath, folderName).split('\\');
+    for (var i = (currentPath.length - 1), newPath; i > 0; i--) {
+        newPath = strFormat('{0}\\{1}', currentPath.slice(0, i).join('\\'), folderName);
+        if (fs.existsSync(newPath)) {
+            return newPath;
         }
     }
 
+    throw new Error('No ' + currentPath + 'found!');
 }
 
 exports.utils = {

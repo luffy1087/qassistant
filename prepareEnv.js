@@ -5,10 +5,7 @@ var commands = require('./commands').commands;
     pathResolver = require('path'),
     currentPath = process.cwd();
 
-var c = require('child_process');
-
 function changeDir(path) {
-    console.log(path);
     process.chdir(path);
 }
 
@@ -28,20 +25,12 @@ function gitResetCmd() {
     return 'git reset --hard'
 }
 
-function gitPruneLocalCmd() {
-    return "git gc --prune=now";
-}
-
 function gitPullCmd() {
     return 'git pull';
 }
 
-function cleanPackagesCmd() {
-    return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder('packages'));
-}
-
-function buildCmd(devenv, project) {
-    return utils.strFormat('"{0}" "{1}" /rebuild', devenv, project);
+function cleanPackagesCmd(path) {
+    return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
 }
 
 function restorePackagesCmd(path) {
@@ -106,7 +95,7 @@ function prepareFirstEnvironment(args) {
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
         execTask(gitSwitchBranchCmd, args.mainRepoBranch),//Update to origin (not local)
-        taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd),
+        taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd.bind(this, args.mainProjectPath)),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.mainProjectPath]),
         spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"])
