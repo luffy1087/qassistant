@@ -67,14 +67,6 @@ function taskOrDefault(shouldRun, getCommand) {
     return execTask(getCommand, args);
 }
 
-function getSecondEnvironmentPath(patternOrPath, placeholderValueOrEmpty) {
-    if (placeholderValueOrEmpty && !!patternOrPath.match(/\{0\}/)) {
-        return utils.getPathByPattern(patternOrPath, placeholderValueOrEmpty, placeholderValueOrEmpty);
-    }
-
-    return patternOrPath;
-}
-
 function onFirstEnvironmentFinished(args) {
     args.events.emit('onFirstEnvironmentFinished', args);
 }
@@ -99,17 +91,16 @@ function prepareFirstEnvironment(args) {
 }
 
 function prepareSecondEnvironment(args) {
-    var path = getSecondEnvironmentPath(args.patternOrPath, args.placeholderValueOrEmpty);
     async.series([
-        nodeTask(changeDir, path),
+        nodeTask(changeDir, args.repoPath),
         execTask(gitResetCmd),
         execTask(gitCleanChangesCmd),
         execTask(gitCleanDirectoryCmd),
         execTask(gitSwitchBranchCmd, args.repoBranch),
-        taskOrDefault(true, cleanPackagesCmd.bind(this, path)),
+        taskOrDefault(true, cleanPackagesCmd.bind(this, args.repoPath)),
         execTask(gitPullCmd),
-        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', path]),
-        spawnTask(args.devenvPath, [utils.getSolutionFile(path), "/rebuild"]),
+        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.repoPath]),
+        spawnTask(args.devenvPath, [utils.getSolutionFile(args.repoPath), "/rebuild"]),
         onSecondEnvironmentFinished.bind(this, args)
     ]);
 }

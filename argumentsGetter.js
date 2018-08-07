@@ -1,5 +1,6 @@
 var args = require('optimist').argv,
-    readline = require('readline-sync');
+    readline = require('readline-sync'),
+    utils = require('./utils').utils;
 
 function argumentsGetter(cfg) {
     var numberOfArgumets = Object.keys(args).length - 2;
@@ -12,7 +13,8 @@ function argumentsGetter(cfg) {
         repoBranch: args["s"],
         placeholderValueOrEmpty: args["p"],
         dlls: args["d"],
-        canRemovePackagesMainRepo: args["c"] === 'y'
+        canRemovePackagesMainRepo: args["c"] === 'y',
+        repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
     };
 }
 
@@ -26,6 +28,7 @@ function interactiveArgumentsGetter(cfg) {
     questions.forEach(function(argName) { objectArgs[argName] =  readline.question('Type the argument ' + argName + "\n"); });
     
     objectArgs.canRemovePackagesMainRepo = objectArgs.canRemovePackagesMainRepo === 'y';
+    objectArgs.repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, objectArgs.placeholderValueOrEmpty);
 
     return objectArgs;
 }

@@ -12,14 +12,16 @@ function strFormat() {
     return str;
 }
 
-function getPathByPattern(pattern, value) {
+function tryGetPathByPattern(pattern, value) {
     var repetitions = pattern.match(/{\d+}/g).length;
+    
+    if (repetitions === 0) { return pattern; }
+    
     var values = [pattern].concat(value.concat(',').repeat(repetitions).slice(0, -1).split(','));
     var path = strFormat.apply(this, values);
 
     if (fs.existsSync(path)) { return path; }
 
-    console.log(path);
     throw new Error('Path does not exist');
 }
 
@@ -60,7 +62,7 @@ function getSolutionFile(filePath) {
 
 exports.utils = {
     strFormat: strFormat,
-    getPathByPattern: getPathByPattern,
+    tryGetPathByPattern: tryGetPathByPattern,
     searchForFolder: searchForFolder,
     searchForFile: searchForFile,
     getSolutionFile: getSolutionFile
