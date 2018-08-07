@@ -3,7 +3,6 @@ var commands = require('./commands').commands;
     glob = require('glob'),
     async = require('async'),
     pathResolver = require('path'),
-    jsDOM = require('jsdom'),
     currentPath = process.cwd();
 
 function changeDir(path) {
@@ -32,19 +31,6 @@ function gitPullCmd() {
 
 function cleanPackagesCmd(path) {
     return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
-}
-
-function restorePackagesCmd(path) {
-    return utils.strFormat('"{0}\\nuget" restore {1}', currentPath, path);
-}
-
-function getSolutionFile(path) {
-    var files = glob.sync(utils.strFormat('{0}\\*.sln', path));
-    if (files && files.length == 1) {
-        return pathResolver.resolve(files[0]);
-    }
-
-    throw new Error('Error: Project not found in ' + path);
 }
 
 function spawnTask(cmd, options) {
@@ -93,6 +79,10 @@ function onFirstEnvironmentFinished(args) {
     args.events.emit('onFirstEnvironmentFinished', args);
 }
 
+function onSecondEnvironmentFinished(args) {
+    args.events.emit('onSecondEnvironmentFinished', args);
+}
+
 function prepareFirstEnvironment(args) {
     async.series([
         nodeTask(changeDir, args.mainProjectPath),
@@ -103,7 +93,7 @@ function prepareFirstEnvironment(args) {
         taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd.bind(this, args.mainProjectPath)),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', args.mainProjectPath]),
-        spawnTask(args.devenvPath, [getSolutionFile(args.mainProjectPath), "/rebuild"]),
+        spawnTask(args.devenvPath, [utils.getSolutionFile(args.mainProjectPath), "/rebuild"]),
         onFirstEnvironmentFinished.bind(this, args)
     ]);
 }
@@ -119,13 +109,12 @@ function prepareSecondEnvironment(args) {
         taskOrDefault(true, cleanPackagesCmd.bind(this, path)),
         execTask(gitPullCmd),
         spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', path]),
-        spawnTask(args.devenvPath, [getSolutionFile(path), "/rebuild"])
-        //xml parser
-        //onFinishedSeries
+        spawnTask(args.devenvPath, [utils.getSolutionFile(path), "/rebuild"]),
+        onSecondEnvironmentFinished.bind(this, args)
     ]);
 }
 
 exports.prepareEnv = {
     prepareFirstEnvironment: prepareFirstEnvironment,
     prepareSecondEnvironment: prepareSecondEnvironment
-}
+};
