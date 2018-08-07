@@ -39,25 +39,23 @@ function searchForFolder(filePath, folderName) {
 
 function searchForFile(filePath, regFileName) {
     var currentPath = filePath.split('\\');
-    for (var i = (currentPath.length - 1), files; i > 0; i--) {
+    for (var i = currentPath.length, files; i > 0; i--) {
         newPath = currentPath.slice(0, i).join('\\');
-        files = glob.sync(utils.strFormat('{0}\\{1}', newPath, regFileName));
+        files = glob.sync(strFormat('{0}\\{1}', newPath, regFileName));
         if (files && files.length == 1) {
             return pathResolver.resolve(files[0]);
         }
     }
 
-    console.log('WARNING: searchForFile did not find any files');
+    throw new Error('WARNING: searchForFile did not find any files');
 }
 
 function getSolutionFile(filePath) {
     return searchForFile(filePath, '*.sln');
-    // var files = glob.sync(utils.strFormat('{0}\\*.sln', path));
-    // if (files && files.length == 1) {
-    //     return pathResolver.resolve(files[0]);
-    // }
+}
 
-    // throw new Error('Error: Project not found in ' + path);
+function getCsprojFile(filePath) {
+    return searchForFile(filePath, '*.csproj');
 }
 
 exports.utils = {
@@ -65,5 +63,6 @@ exports.utils = {
     tryGetPathByPattern: tryGetPathByPattern,
     searchForFolder: searchForFolder,
     searchForFile: searchForFile,
-    getSolutionFile: getSolutionFile
+    getSolutionFile: getSolutionFile,
+    getCsprojFile: getCsprojFile
 };

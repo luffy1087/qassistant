@@ -14,7 +14,7 @@ function argumentsGetter(cfg) {
         placeholderValueOrEmpty: args["p"],
         dlls: args["d"],
         canRemovePackagesMainRepo: args["c"] === 'y',
-        repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
+        repoPath: utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
     };
 }
 
