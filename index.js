@@ -7,6 +7,7 @@ var configuration = require('./configure').configuration,
 function startProgram(cfg) {
     var args = require('./argumentsGetter').argumentsGetter(cfg);
     var wholeObject = extend({ events: events }, cfg, args);
+    
     prepareEnvs.prepareFirstEnvironment(wholeObject);
 }
 

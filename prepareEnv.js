@@ -67,6 +67,12 @@ function taskOrDefault(shouldRun, getCommand) {
     return execTask(getCommand, args);
 }
 
+function eventTask(args) {
+    args.events.once('eventTaskEnd', function() {
+        //To Do
+    });
+}
+
 function onFirstEnvironmentFinished(args) {
     args.events.emit('onFirstEnvironmentFinished', args);
 }
