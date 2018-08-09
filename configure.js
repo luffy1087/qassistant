@@ -52,7 +52,8 @@ function createConfigurationJson(devenvPath) {
     return {
         mainProjectPath: askPath('mainProjectPath'),
         patternOrPath: askPath('patternOrPath (e.g: C:\\projects\\{0}\\Src)'),
-        devenvPath: devenvPath
+        devenvPath: devenvPath,
+        packagesFolder: 'packages'
     };
 }
 
