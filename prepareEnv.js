@@ -3,6 +3,7 @@ var commands = require('./commands').commands;
     glob = require('glob'),
     async = require('async'),
     pathResolver = require('path'),
+    packagesReader = require('./packagesReader'),
     currentPath = process.cwd();
 
 function changeDir(path) {
@@ -33,19 +34,28 @@ function cleanPackagesCmd(path) {
     return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
 }
 
+function executePackagesToUpdate(packagesDirPath, packages, resolveTask) {
+    var nugetPath = utils.strFormat('{0}\\nuget', currentPath);
+    var series = [];
+    for (var i = 0, package; package = packages[i]; i++) {
+        series.push(spawnTask(nugetPath, ['install', package, '-OutputDirectory', packagesDirPath] ));
+    }
+    series.push(resolveTask);
+    async.series(series);
+}
+
 function spawnTask(cmd, options) {
     return function(resolveTask) {
         commands.spawn(cmd, options, resolveTask);
-    }
+    };
 }
 
-function execTask(getCommand) {
+function execCommandTask(getCommand) {
     var args = Array.prototype.slice.call(arguments, 1);
 
     return function(resolveTask) {
-        console.log(getCommand.apply(this, args));
         commands.exec(getCommand.apply(this, args), resolveTask);
-    }
+    };
 }
 
 function nodeTask(callback) {
@@ -54,23 +64,28 @@ function nodeTask(callback) {
     return function(resolveTask) {
         callback.apply(this, args);
         resolveTask();
-    }
+    };
 }
 
-function taskOrDefault(shouldRun, getCommand) {
+function eventTask(task, onTaskEnd) {
+    
+    return function(resolveTask) {
+        this.args.events.once('onTaskEnd', function(data) {
+            onTaskEnd(data, resolveTask);
+        });
+
+        task();
+    };
+}
+
+function taskOrDefault(shouldRun, task) {
     if (!shouldRun) {
         return function(resolveTask) { resolveTask(); };
     }
     
-    var args = Array.prototype.slice.call(arguments, 2);
-    
-    return execTask(getCommand, args);
-}
-
-function eventTask(args) {
-    args.events.once('eventTaskEnd', function() {
-        //To Do
-    });
+    return function(resolveTask) {
+       task(resolveTask);
+    };
 }
 
 function onFirstEnvironmentFinished(args) {
@@ -85,29 +100,33 @@ function prepareFirstEnvironment(args) {
     var solutionPath = utils.getSolutionFile(args.mainProjectPath);
     async.series([
         nodeTask(changeDir, args.mainProjectPath),
-        execTask(gitResetCmd),
-        execTask(gitCleanChangesCmd),
-        execTask(gitCleanDirectoryCmd),
-        execTask(gitSwitchBranchCmd, args.mainRepoBranch),//Update to origin (not local)
-        taskOrDefault(args.canRemovePackagesMainRepo, cleanPackagesCmd.bind(this, args.mainProjectPath)),
-        execTask(gitPullCmd),
-        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath]),
+        execCommandTask(gitResetCmd),
+        execCommandTask(gitCleanChangesCmd),
+        execCommandTask(gitCleanDirectoryCmd),
+        execCommandTask(gitSwitchBranchCmd, args.mainRepoBranch),
+        taskOrDefault(args.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, args.mainProjectPath))),
+        execCommandTask(gitPullCmd),
+        taskOrDefault(args.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
         spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
         onFirstEnvironmentFinished.bind(this, args)
     ]);
 }
 
 function prepareSecondEnvironment(args) {
+    var reader = new packagesReader(args);
     var solutionPath = utils.getSolutionFile(args.repoPath);
+    var packagesConfigPath = utils.getPackagesConfigFile(args.repoPath);
+    var packagesDirPath = utils.searchForFolder(repoPath, args.packagesFolder);
     async.series([
         nodeTask(changeDir, args.repoPath),
-        execTask(gitResetCmd),
-        execTask(gitCleanChangesCmd),
-        execTask(gitCleanDirectoryCmd),
-        execTask(gitSwitchBranchCmd, args.repoBranch),
+        execCommandTask(gitResetCmd),
+        execCommandTask(gitCleanChangesCmd),
+        execCommandTask(gitCleanDirectoryCmd),
+        execCommandTask(gitSwitchBranchCmd, args.repoBranch),
         taskOrDefault(true, cleanPackagesCmd.bind(this, args.repoPath)),
-        execTask(gitPullCmd),
-        spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath]),
+        execCommandTask(gitPullCmd),
+        taskOrDefault(!args.shouldUpdatePackages, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
+        taskOrDefault(args.shouldUpdatePackages, eventTask(reader.readAndFilterPackages.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this, packagesDirPath))),
         spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
         onSecondEnvironmentFinished.bind(this, args)
     ]);

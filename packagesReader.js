@@ -11,7 +11,7 @@ function getXmlFile(path, resolveTask) {
 }
 
 function parseXml(xmlString, resolveTask) {
-    xml2js.parseString(xmlString, function(err, json) {
+    xml2js.parseString(xmlString, this.xmlParserOptons, function(err, json) {
         if (!err) { return void resolveTask(null, json.packages.package); }
         
         throw new Error('error raised parsing xml');
@@ -31,7 +31,7 @@ function executeTask(task) {
     return function() {
         var resolvedArgs = Array.prototype.slice.call(arguments, 0);
         task.apply(this, args.concat(resolvedArgs));
-    }
+    }.bind(this);
 }
 
 function readPackagesDirectory() {
@@ -44,17 +44,25 @@ function onTaskEnd(data, resolveTask) {
     resolveTask();
 }
 
-function readAndFilterPackages(path, regExpString) {
+function readAndFilterPackages(path) {
     async.waterfall([
-        executeTask(getXmlFile, path),
-        executeTask(parseXml),
-        executeTask(filterPackages, regExpString),
+        executeTask(getXmlFile, path).bind(this),
+        executeTask(parseXml).bind(this),
+        executeTask(filterPackages, this.args.filterRegExp).bind(this),
         onTaskEnd.bind(this)
     ]);
 }
 
+function defaultProcessing(name) { return name; }
+
 function packagesReaderClazz(args) {
     this.args = args;
+    this.xmlParserOptons = { 
+        tagNameProcessors: [ defaultProcessing ],
+        attrNameProcessors: [ defaultProcessing ],
+        valueProcessors: [ defaultProcessing ],
+        attrValueProcessors: [ defaultProcessing ]
+    };
 }
 
 packagesReaderClass.prototype.readAndFilterPackages = readAndFilterPackages;

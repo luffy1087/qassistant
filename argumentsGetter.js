@@ -9,25 +9,27 @@ function argumentsGetter(cfg) {
     }
     //node index.js -y "development" -s "master" -p "VALENTINO" -d "Cart,Item" -c "y"
     return {
-        mainRepoBranch: args["y"],
-        repoBranch: args["s"],
+        mainRepoBranch: args['y'],
+        canRemovePackagesMainRepo: args['c'] === 'y',
+        repoBranch: args['s'],
+        shouldUpdatePackages: args['u'] === 'y',
         placeholderValueOrEmpty: args["p"],
         dlls: args["d"],
-        canRemovePackagesMainRepo: args["c"] === 'y',
         repoPath: utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
     };
 }
 
 function interactiveArgumentsGetter(cfg) {
-    var isSecondRepoPath = cfg.patternOrPath.indexOf('{0}') === -1;
+    var isSecondRepoPath = cfg.patternOrPath.indexOf('{0}') > -1;
     var objectArgs = {};
-    var questions = ['mainRepoBranch', 'canRemovePackagesMainRepo', 'repoBranch', 'placeholderValueOrEmpty', 'dlls'];
-    
-    if (isSecondRepoPath) { questions.splice(3, 1); }
-    
-    questions.forEach(function(argName) { objectArgs[argName] =  readline.question('Type the argument ' + argName + "\n"); });
-    
-    objectArgs.canRemovePackagesMainRepo = objectArgs.canRemovePackagesMainRepo === 'y';
+    objectArgs.mainRepoBranch = readline.question('Which is the branch name of the main project?\n');
+    objectArgs.canRemovePackagesMainRepo = readline.question('Should I remove packages from the main project? y/n\n') === 'y';
+    objectArgs.repoBranch = readline.question('Which is the brach name of the second project?\n');
+    objectArgs.shouldUpdatePackages = readline.question('Should I update packages for the second project? y/n\n') === 'y';
+    if (isSecondRepoPath) {
+        objectArgs.placeholderValueOrEmpty = readline.question('Type the value for the placeholder to build the path for the second project.\n');
+    }
+    objectArgs.dlls = readline.question('type a commna-saparated list of dlls to move.\n');
     objectArgs.repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, objectArgs.placeholderValueOrEmpty);
 
     return objectArgs;

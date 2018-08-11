@@ -58,6 +58,10 @@ function getCsprojFile(filePath) {
     return searchForFile(filePath, '*.csproj');
 }
 
+function getPackagesConfigFile(filePath) {
+    return searchForFile(filePath, '*.config');
+}
+
 exports.utils = {
     strFormat: strFormat,
     tryGetPathByPattern: tryGetPathByPattern,
