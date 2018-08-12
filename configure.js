@@ -65,5 +65,4 @@ function getConfig() {
     getBuildCommand.call(this);
 }
 
-//exports.configuration = { getConfig, this.eventEmitter: this.eventEmitter };
 module.exports = getConfig;

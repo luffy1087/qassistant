@@ -1,10 +1,6 @@
 var commands = require('./commands').commands;
     utils = require('./utils').utils,
-    glob = require('glob'),
-    async = require('async'),
-    pathResolver = require('path'),
-    packagesReader = require('./packagesReader'),
-    currentPath = process.cwd();
+    packagesReader = require('./packagesReader');
 
 function changeDir(path) {
     process.chdir(path);
@@ -88,51 +84,56 @@ function taskOrDefault(shouldRun, task) {
     };
 }
 
-function onFirstEnvironmentFinished(args) {
-    args.events.emit('onFirstEnvironmentFinished', args);
+function onFirstEnvironmentFinished(resolveTask) {
+    this.eventEmitter.emit('onFirstEnvironmentFinished');
+    resolveTask();
 }
 
-function onSecondEnvironmentFinished(args) {
-    args.events.emit('onSecondEnvironmentFinished', args);
+function onSecondEnvironmentFinished(resolveTask) {
+    this.eventEmitter.emit('onSecondEnvironmentFinished');
+    resolveTask();
 }
 
-function prepareFirstEnvironment(args) {
-    var solutionPath = utils.getSolutionFile(args.mainProjectPath);
-    async.series([
-        nodeTask(changeDir, args.mainProjectPath),
+function prepareFirstEnvironment() {
+    //var solutionPath = this.utils.getSolutionFile(args.mainProjectPath);
+    this.async.series([
+        nodeTask(changeDir, this.configuration.mainProjectPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
-        execCommandTask(gitSwitchBranchCmd, args.mainRepoBranch),
-        taskOrDefault(args.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, args.mainProjectPath))),
+        execCommandTask(gitSwitchBranchCmd, this.configuration.mainRepoBranch),
+        taskOrDefault(args.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, this.configuration.mainProjectPath))),
         execCommandTask(gitPullCmd),
-        taskOrDefault(args.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
-        spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
-        onFirstEnvironmentFinished.bind(this, args)
+        // taskOrDefault(args.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
+        // spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
+        onFirstEnvironmentFinished.bind(this)
     ]);
 }
 
-function prepareSecondEnvironment(args) {
-    var reader = new packagesReader(args);
-    var solutionPath = utils.getSolutionFile(args.repoPath);
-    var packagesConfigPath = utils.getPackagesConfigFile(args.repoPath);
-    var packagesDirPath = utils.searchForFolder(repoPath, args.packagesFolder);
+function prepareSecondEnvironment() {
+    // packagesReader must be included in the prototype
+    // var reader = new packagesReader(args);
+    var solutionPath = this.utils.getSolutionFile(this.arguments.repoPath);
+    // var packagesConfigPath = this.utils.getPackagesConfigFile(args.repoPath);
+    // var packagesDirPath = this.utils.searchForFolder(repoPath, args.packagesFolder);
     async.series([
-        nodeTask(changeDir, args.repoPath),
+        nodeTask(changeDir, this.arguments.repoPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
-        execCommandTask(gitSwitchBranchCmd, args.repoBranch),
-        taskOrDefault(true, cleanPackagesCmd.bind(this, args.repoPath)),
+        execCommandTask(gitSwitchBranchCmd, this.arguments.repoBranch),
+        taskOrDefault(true, cleanPackagesCmd.bind(this, this.arguments.repoPath)),
         execCommandTask(gitPullCmd),
         taskOrDefault(!args.shouldUpdatePackages, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
-        taskOrDefault(args.shouldUpdatePackages, eventTask(reader.readAndFilterPackages.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this, packagesDirPath))),
+        //taskOrDefault(args.shouldUpdatePackages, eventTask(reader.readAndFilterPackages.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this, packagesDirPath))),
         spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
-        onSecondEnvironmentFinished.bind(this, args)
+        onSecondEnvironmentFinished.bind(this)
     ]);
 }
 
-exports.prepareEnv = {
-    prepareFirstEnvironment: prepareFirstEnvironment,
-    prepareSecondEnvironment: prepareSecondEnvironment
-};
+function PrepareEnv() {
+    this.prepareFirstEnvironment = prepareFirstEnvironment;
+    this.prepareSecondEnvironment = prepareSecondEnvironment;
+}
+
+module.exports = PrepareEnv;

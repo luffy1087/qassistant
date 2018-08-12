@@ -13,6 +13,10 @@ function Base() {
     getConfig.call(this);
 }
 
+Base.prototype.currentPath = process.cwd();
 Base.prototype.eventEmitter = new eventEmitter();
 Base.prototype.utils = utils;
+Base.prototype.glob = require('glob'),
+Base.prototype.async = require('async'),
+Base.prototype.pathResolver = require('path'),
 module.exports = Base;

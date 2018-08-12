@@ -1,5 +1,6 @@
-var fs = require('fs'),
-    pathResolver = require('path');
+var fs = require('fs')
+,   pathResolver = require('path')
+,   glob = require('glob');
 
 function strFormat() {
     var str = arguments[0];

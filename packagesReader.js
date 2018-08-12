@@ -65,7 +65,6 @@ function packagesReaderClazz(args) {
     };
 }
 
-packagesReaderClass.prototype.readAndFilterPackages = readAndFilterPackages;
-packagesReaderClass.prototype.readPackagesDirectory = readPackagesDirectory;
-
-exports.packagesReader = packagesReaderClazz;
+packagesReaderClazz.prototype.readAndFilterPackages = readAndFilterPackages;
+packagesReaderClazz.prototype.readPackagesDirectory = readPackagesDirectory;
+module.exports = packagesReaderClazz;
