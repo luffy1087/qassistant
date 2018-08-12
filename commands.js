@@ -44,7 +44,4 @@ function exec(cmdString, callback) {
   return executedProcess;
 }
 
-exports.commands = {
-  spawn: spawn,
-  exec: exec
-};
+module.exports = { spawn: spawn, exec: exec };

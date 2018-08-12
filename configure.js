@@ -1,6 +1,6 @@
-var fs = require('fs'),
-    readline = require('readline-sync'),
-    Registry = require('winreg');
+var fs = require('fs')
+  , readline = require('readline-sync')
+  , Registry = require('winreg');
 
 function askPath(type) {
     do {

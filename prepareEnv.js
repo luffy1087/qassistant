@@ -1,6 +1,5 @@
-var commands = require('./commands').commands;
-    utils = require('./utils').utils,
-    packagesReader = require('./packagesReader');
+var commands = require('./commands')
+  , packagesReader = require('./packagesReader');
 
 function changeDir(path) {
     process.chdir(path);
