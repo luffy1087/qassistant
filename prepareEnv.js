@@ -7,7 +7,7 @@ function changeDir(path) {
 }
 
 function gitSwitchBranchCmd(branch) {
-    return utils.strFormat('git checkout {0}', branch);
+    return this.utils.strFormat('git checkout {0}', branch);
 }
 
 function gitCleanChangesCmd() {
@@ -27,7 +27,7 @@ function gitPullCmd() {
 }
 
 function cleanPackagesCmd(path) {
-    return utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
+    return this.utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
 }
 
 function executePackagesToUpdate(packagesDirPath, packages, resolveTask) {
@@ -101,8 +101,8 @@ function prepareFirstEnvironment() {
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
-        execCommandTask(gitSwitchBranchCmd, this.configuration.mainRepoBranch),
-        taskOrDefault(args.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, this.configuration.mainProjectPath))),
+        execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.mainRepoBranch),
+        taskOrDefault(this.arguments.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, this.arguments.mainProjectPath))),
         execCommandTask(gitPullCmd),
         // taskOrDefault(args.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
         // spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
@@ -116,12 +116,12 @@ function prepareSecondEnvironment() {
     var solutionPath = this.utils.getSolutionFile(this.arguments.repoPath);
     // var packagesConfigPath = this.utils.getPackagesConfigFile(args.repoPath);
     // var packagesDirPath = this.utils.searchForFolder(repoPath, args.packagesFolder);
-    async.series([
+    this.async.series([
         nodeTask(changeDir, this.arguments.repoPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
-        execCommandTask(gitSwitchBranchCmd, this.arguments.repoBranch),
+        execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.repoBranch),
         taskOrDefault(true, cleanPackagesCmd.bind(this, this.arguments.repoPath)),
         execCommandTask(gitPullCmd),
         taskOrDefault(!args.shouldUpdatePackages, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
