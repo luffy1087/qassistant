@@ -1,11 +1,10 @@
 var args = require('optimist').argv,
-    readline = require('readline-sync'),
-    utils = require('./utils').utils;
+    readline = require('readline-sync');
 
 function argumentsGetter(cfg) {
     var numberOfArgumets = Object.keys(args).length - 2;
     if (numberOfArgumets == 0) {
-        return interactiveArgumentsGetter(cfg);
+        return interactiveArgumentsGetter.call(this, cfg);
     }
     //node index.js -y "development" -s "master" -p "VALENTINO" -d "Cart,Item" -c "y"
     return {
@@ -15,7 +14,7 @@ function argumentsGetter(cfg) {
         shouldUpdatePackages: args['u'] === 'y',
         placeholderValueOrEmpty: args["p"],
         dlls: args["d"],
-        repoPath: utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
+        repoPath: this.utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
     };
 }
 
@@ -30,9 +29,9 @@ function interactiveArgumentsGetter(cfg) {
         objectArgs.placeholderValueOrEmpty = readline.question('Type the value for the placeholder to build the path for the second project.\n');
     }
     objectArgs.dlls = readline.question('type a commna-saparated list of dlls to move.\n');
-    objectArgs.repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, objectArgs.placeholderValueOrEmpty);
+    objectArgs.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, objectArgs.placeholderValueOrEmpty);
 
     return objectArgs;
 }
 
-exports.argumentsGetter = argumentsGetter;
+module.exports = argumentsGetter;

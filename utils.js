@@ -13,9 +13,9 @@ function strFormat() {
 }
 
 function tryGetPathByPattern(pattern, value) {
-    var repetitions = pattern.match(/{\d+}/g).length;
+    var repetitions = pattern.match(/{\d+}/g) || [];
     
-    if (repetitions === 0) { return pattern; }
+    if (repetitions.length === 0) { return pattern; }
     
     var values = [pattern].concat(value.concat(',').repeat(repetitions).slice(0, -1).split(','));
     var path = strFormat.apply(this, values);
@@ -62,11 +62,12 @@ function getPackagesConfigFile(filePath) {
     return searchForFile(filePath, '*.config');
 }
 
-exports.utils = {
+module.exports = {
     strFormat: strFormat,
     tryGetPathByPattern: tryGetPathByPattern,
     searchForFolder: searchForFolder,
     searchForFile: searchForFile,
     getSolutionFile: getSolutionFile,
-    getCsprojFile: getCsprojFile
+    getCsprojFile: getCsprojFile,
+    getPackagesConfigFile: getPackagesConfigFile
 };

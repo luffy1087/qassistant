@@ -1,8 +1,6 @@
 var fs = require('fs'),
     readline = require('readline-sync'),
-    Registry = require('winreg'),
-    eventEmitter = require('events'),
-    events = new eventEmitter();
+    Registry = require('winreg');
 
 function askPath(type) {
     do {
@@ -17,9 +15,9 @@ function askPath(type) {
     while(true)
 }
 
-function getDevEnvPath() {
+function getBuildCommand() {
     var vsPaths = new Registry({hive: Registry.HKLM, key: '\\SOFTWARE\\Wow6432Node\\Microsoft\\VisualStudio\\SxS\\VS7'});
-    vsPaths.values(onRegistryValues);
+    vsPaths.values(onRegistryValues.bind(this));
 }
 
 function onRegistryValues(err, items) {
@@ -32,7 +30,7 @@ function onRegistryValues(err, items) {
         
         if (!fs.existsSync(file)) { continue; }
 
-        events.emit('onDevPath', file);
+        this.eventEmitter.emit('onBuildCommandFound', file);
 
         return;
     }
@@ -40,19 +38,19 @@ function onRegistryValues(err, items) {
     throw new Error('Devenv not found the registry');
 }
 
-function readyToStart(devenvPath) {
-    var json = createConfigurationJson(devenvPath);
+function onBuildCommandFound(buildCommand) {
+    var json = createConfigurationJson(buildCommand);
 
     fs.writeFileSync('configure.json', JSON.stringify(json));
 
-    events.emit('onStart', json);
+    this.eventEmitter.emit('onConfigurationCreated', json);
 }
 
-function createConfigurationJson(devenvPath) {
+function createConfigurationJson(buildCommand) {
     return {
         mainProjectPath: askPath('mainProjectPath'),
         patternOrPath: askPath('patternOrPath (e.g: C:\\projects\\{0}\\Src)'),
-        devenvPath: devenvPath,
+        buildCommand: buildCommand,
         packagesFolder: 'packages',
         filterRegExp: 'F31\\.*'
     };
@@ -60,11 +58,12 @@ function createConfigurationJson(devenvPath) {
 
 function getConfig() {
     if (fs.existsSync('./configure.json')) {
-        return void events.emit('onStart', require('./configure.json'));
+        return void this.eventEmitter.emit('onConfigurationCreated', require('./configure.json'));
     }
     
-    events.once('onDevPath', readyToStart);
-    getDevEnvPath();
+    this.eventEmitter.once('onBuildCommandFound', onBuildCommandFound.bind(this));
+    getBuildCommand.call(this);
 }
 
-exports.configuration = { getConfig, events: events };
+//exports.configuration = { getConfig, this.eventEmitter: this.eventEmitter };
+module.exports = getConfig;
