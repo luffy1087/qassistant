@@ -18,7 +18,8 @@ function tryGetPathByPattern(pattern, value) {
     
     if (repetitions.length === 0) { return pattern; }
     
-    var values = [pattern].concat(value.concat(',').repeat(repetitions).slice(0, -1).split(','));
+    var values = [pattern].concat(value.concat(',').repeat(repetitions.length).slice(0, -1).split(','));
+    
     var path = strFormat.apply(this, values);
 
     if (fs.existsSync(path)) { return path; }

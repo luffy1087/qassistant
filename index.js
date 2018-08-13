@@ -7,5 +7,7 @@ PrepareEnv.prototype = baseModule;
 //Initialize modules
 var prepareEnvironment = new PrepareEnv();
 //Start program
-prepareEnvironment.prepareFirstEnvironment();
-prepareEnvironment.prepareSecondEnvironment();
+baseModule.eventEmitter.on('onArgumentsSet', function() {
+    prepareEnvironment.prepareFirstEnvironment();
+    prepareEnvironment.prepareSecondEnvironment();
+});

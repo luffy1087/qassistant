@@ -26,7 +26,7 @@ function gitPullCmd() {
 }
 
 function cleanPackagesCmd(path) {
-    return this.utils.strFormat('rmdir /S /Q {0}', utils.searchForFolder(path, 'packages'));
+    return this.utils.strFormat('rmdir /S /Q {0}', this.utils.searchForFolder(path, 'packages'));
 }
 
 function executePackagesToUpdate(packagesDirPath, packages, resolveTask) {
@@ -107,8 +107,8 @@ function prepareFirstEnvironment() {
         execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.mainRepoBranch),
         taskOrDefault(this.arguments.canRemovePackagesMainRepo, execCommandTask(cleanPackagesCmd.bind(this, this.arguments.mainProjectPath))),
         execCommandTask(gitPullCmd),
-        // taskOrDefault(args.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
-        // spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
+        // taskOrDefault(this.arguments.canRemovePackagesMainRepo, spawnTask(utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath])),
+        // spawnTask(this.configuration.buildCommand, [solutionPath, "/rebuild"]),
         onFirstEnvironmentFinished.bind(this)
     ]);
 }
@@ -128,9 +128,9 @@ function prepareSecondEnvironment() {
         execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.repoBranch),
         taskOrDefault(true, cleanPackagesCmd.bind(this, this.arguments.repoPath)),
         execCommandTask(gitPullCmd),
-        taskOrDefault(!args.shouldUpdatePackages, spawnTask(utils.strFormat('{0}\\nuget', currentPath), ['restore', solutionPath])),
-        //taskOrDefault(args.shouldUpdatePackages, eventTask(reader.readAndFilterPackages.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this, packagesDirPath))),
-        spawnTask(args.devenvPath, [solutionPath, "/rebuild"]),
+        taskOrDefault(!this.arguments.shouldUpdatePackages, spawnTask(this.utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath])),
+        //taskOrDefault(this.arguments.shouldUpdatePackages, eventTask(reader.readAndFilterPackages.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this, packagesDirPath))),
+        spawnTask(this.configuration.buildCommand, [solutionPath, "/rebuild"]),
         onSecondEnvironmentFinished.bind(this)
     ]);
 }

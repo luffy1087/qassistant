@@ -6,6 +6,8 @@ var eventEmitter = require('events')
 function onConfigurationLoaded(cfg) {
     this.configuration = cfg;
     this.arguments = argumentsGetter.call(this, cfg);
+
+    setTimeout(function() { this.eventEmitter.emit('onArgumentsSet'); }.bind(this), 0);
 }
 
 function Base() {
