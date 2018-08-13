@@ -7,5 +7,5 @@ PrepareEnv.prototype = baseModule;
 //Initialize modules
 var prepareEnvironment = new PrepareEnv();
 //Start program
-console.log(prepareEnvironment.arguments);
 prepareEnvironment.prepareFirstEnvironment();
+prepareEnvironment.prepareSecondEnvironment();
