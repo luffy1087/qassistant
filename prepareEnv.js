@@ -93,6 +93,10 @@ function onSecondEnvironmentFinished(resolveTask) {
     resolveTask();
 }
 
+function secondEnvironmentStater(resolveTask) {
+    this.eventEmitter.once('onFirstEnvironmentFinished', resolveTask);
+}
+
 function prepareFirstEnvironment() {
     //var solutionPath = this.utils.getSolutionFile(args.mainProjectPath);
     this.async.series([
@@ -116,6 +120,7 @@ function prepareSecondEnvironment() {
     // var packagesConfigPath = this.utils.getPackagesConfigFile(args.repoPath);
     // var packagesDirPath = this.utils.searchForFolder(repoPath, args.packagesFolder);
     this.async.series([
+        secondEnvironmentStater.bind(this),
         nodeTask(changeDir, this.arguments.repoPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
