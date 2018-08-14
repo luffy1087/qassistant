@@ -1,8 +1,7 @@
-var utils = require('./utils').utils,
-    xml2js = require('xml2js');
+var xml2js = require('xml2js');
 
-function referenceFixer(args) {
-    var csprojFile = utils.searchForFile(args.repoPath, '*.csproj');
+function ReferencesFixer() {
+    var csprojFile = this.utils.searchForFile(this.arguments.repoPath, '*.csproj');
 }
 
-exports.referenceFixer = referenceFixer;
+module.exports = ReferencesFixer;

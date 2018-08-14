@@ -3,6 +3,7 @@ var childProcess = require('child_process');
 
 function spawn(cmd, options, callback) {
   var correctCmd = cmd.replace(/\.exe/i, '').trim();
+  console.log(correctCmd);
   var spawnedProcess = childProcess.spawn(correctCmd, options);
 
   spawnedProcess.stdout.on('data',function(stream) {
@@ -27,6 +28,7 @@ function spawn(cmd, options, callback) {
 }
 
 function exec(cmdString, callback) {
+  console.log(cmdString);
   var executedProcess = childProcess.exec(cmdString, function(err, stdout, stderr) {
     if (err) {  
       console.log(err);

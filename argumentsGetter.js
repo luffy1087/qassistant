@@ -6,7 +6,7 @@ function argumentsGetter(cfg) {
     if (numberOfArgumets == 0) {
         return interactiveArgumentsGetter.call(this, cfg);
     }
-    //node index.js -y "development" -s "master" -p "VALENTINO" -d "Cart,Item" -c "y"
+    //node index.js -y "development" -c "y" -s "master" -u "y" -p "VALENTINO" -d "Cart,Item"
     return {
         mainRepoBranch: args['y'],
         canRemovePackagesMainRepo: args['c'] === 'y',
@@ -19,19 +19,27 @@ function argumentsGetter(cfg) {
 }
 
 function interactiveArgumentsGetter(cfg) {
-    var isSecondRepoPath = cfg.patternOrPath.indexOf('{0}') > -1;
-    var objectArgs = {};
-    objectArgs.mainRepoBranch = readline.question('Which is the branch name of the main project?\n');
-    objectArgs.canRemovePackagesMainRepo = readline.question('Should I remove packages from the main project? y/n\n') === 'y';
-    objectArgs.repoBranch = readline.question('Which is the brach name of the second project?\n');
-    objectArgs.shouldUpdatePackages = readline.question('Should I update packages for the second project? y/n\n') === 'y';
-    if (isSecondRepoPath) {
-        objectArgs.placeholderValueOrEmpty = readline.question('Type the value for the placeholder to build the path for the second project.\n');
-    }
-    objectArgs.dlls = readline.question('type a commna-saparated list of dlls to move.\n');
-    objectArgs.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, objectArgs.placeholderValueOrEmpty);
+    var questions = [
+        { n:'mainRepoBranch', q:'Which is the branch name of the main project?\n', isBool: false },
+        { n:'canRemovePackagesMainRepo', q:'Should I remove packages from the main project? y/n\n', isBool: true },
+        { n:'repoBranch', q:'Which is the brach name of the second project?\n', isBool: false, shouldAsk: cfg.patternOrPath.indexOf('{0}') > -1 },
+        { n:'shouldUpdatePackages', q:'Should I update packages for the second project? y/n\n', isBool: true },
+        { n:'placeholderValueOrEmpty', q:'Type the value for the placeholder to build the path for the second project.\n', isBool: false },
+        { n:'dlls', q:'type a commna-saparated list of dlls to move.\n', isBool: false }
+    ];
 
-    return objectArgs;
+    var questionsObject = questions.reduce(function(accumulator, current) {
+        if (typeof(current.shouldAsk) !== 'undefined' && !current.shouldAsk) { return accumulator;  }
+        
+        accumulator[current.n] = readline.question(current.q);
+        accumulator[current.n] = current.isBool ? accumulator[current.n] === 'y' : accumulator[current.n];
+        
+        return accumulator;
+    }, {});
+    
+    questionsObject.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, questionsObject.placeholderValueOrEmpty);
+
+    return questionsObject;
 }
 
 module.exports = argumentsGetter;

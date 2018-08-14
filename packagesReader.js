@@ -34,7 +34,7 @@ function executeTask(task) {
     }.bind(this);
 }
 
-function readPackagesDirectory() {
+function getPackagesDir() {
 
 }
 
@@ -44,27 +44,23 @@ function onTaskEnd(data, resolveTask) {
     resolveTask();
 }
 
-function readAndFilterPackages(path) {
+function filterPackagesConfigByRegExp(path) {
     async.waterfall([
         executeTask(getXmlFile, path).bind(this),
         executeTask(parseXml).bind(this),
-        executeTask(filterPackages, this.args.filterRegExp).bind(this),
+        executeTask(filterPackages, this.configuration.filterRegExp).bind(this),
         onTaskEnd.bind(this)
     ]);
 }
 
-function defaultProcessing(name) { return name; }
-
-function packagesReaderClazz(args) {
-    this.args = args;
-    this.xmlParserOptons = { 
-        tagNameProcessors: [ defaultProcessing ],
-        attrNameProcessors: [ defaultProcessing ],
-        valueProcessors: [ defaultProcessing ],
-        attrValueProcessors: [ defaultProcessing ]
-    };
+function defaultProcessing(name) { 
+    return name;
 }
 
-packagesReaderClazz.prototype.readAndFilterPackages = readAndFilterPackages;
-packagesReaderClazz.prototype.readPackagesDirectory = readPackagesDirectory;
-module.exports = packagesReaderClazz;
+function PackagesReader() {
+}
+
+PackagesReader.prototype.filterPackagesConfigByRegExp = filterPackagesConfigByRegExp;
+PackagesReader.prototype.getPackagesDir = getPackagesDir;
+PackagesReader.prototype.xmlParserOptons = { tagNameProcessors: [ defaultProcessing ], attrNameProcessors: [ defaultProcessing ], valueProcessors: [ defaultProcessing ], attrValueProcessors: [ defaultProcessing ] };
+module.exports = PackagesReader;
