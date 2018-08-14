@@ -121,6 +121,7 @@ function prepareFirstEnvironment() {
 
 function prepareSecondEnvironment() {
     var solutionPath = this.utils.getSolutionFile(this.arguments.repoPath);
+    var packagesFolder = this.utils.searchForFolder(this.arguments.repoPath, 'packages');
     // var packagesConfigPath = this.utils.getPackagesConfigFile(args.repoPath);
     // var packagesDirPath = this.utils.searchForFolder(repoPath, args.packagesFolder);
     async.series([
@@ -130,7 +131,7 @@ function prepareSecondEnvironment() {
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
         execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.repoBranch),
-        taskOrDefault(true, cleanPackagesCmd.bind(this, this.arguments.repoPath)),
+        execCommandTask(cleanPackagesCmd.bind(this, packagesFolder)),
         execCommandTask(gitPullCmd),
         taskOrDefault(!this.arguments.shouldUpdatePackages, spawnTask(this.utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath])),
         //taskOrDefault(this.arguments.shouldUpdatePackages, eventTask(filterPackages.bind(this), executePackagesToUpdate.bind(this, packagesDirPath))),
