@@ -44,7 +44,7 @@ function searchForFile(filePath, regFileName) {
     for (var i = currentPath.length, files; i > 0; i--) {
         newPath = currentPath.slice(0, i).join('\\');
         files = glob.sync(strFormat('{0}\\{1}', newPath, regFileName));
-        if (files && files.length == 1) {
+        if (files && files.length > 0) {
             return pathResolver.resolve(files[0]);
         }
     }
@@ -61,7 +61,7 @@ function getCsprojFile(filePath) {
 }
 
 function getPackagesConfigFile(filePath) {
-    return searchForFile(filePath, '*.config');
+    return searchForFile(filePath, 'packages.config');
 }
 
 module.exports = {

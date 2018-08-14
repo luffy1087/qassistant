@@ -39,7 +39,7 @@ function getPackagesDir() {
 }
 
 function onTaskEnd(data, resolveTask) {
-    this.args.events.emit('onTaskEnd', data);
+    this.eventEmitter.emit('onTaskEnd', data);
     
     resolveTask();
 }
@@ -53,7 +53,7 @@ function filterPackagesConfigByRegExp(path) {
     ]);
 }
 
-function defaultProcessing(name) { 
+function defaultProcessing(name) {
     return name;
 }
 

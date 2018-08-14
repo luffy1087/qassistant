@@ -1,6 +1,8 @@
+var PackagesReader = require('./packagesReader');
+
 function Base() {
     this.currentPath = process.cwd();
-    this.packagesReader = require('./packagesReader');
+    this.packagesReader = new PackagesReader();
 }
 
 module.exports = Base;

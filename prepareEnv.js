@@ -29,13 +29,20 @@ function cleanPackagesCmd(path) {
     return this.utils.strFormat('rmdir /S /Q {0}', path);
 }
 
-function executePackagesToUpdate(packagesDirPath, packages, resolveTask) {
-    var nugetPath = utils.strFormat('{0}\\nuget', currentPath);
+function executePackagesToUpdate(packages, resolveTask) {
+    var packagesFolder = this.utils.searchForFolder(this.arguments.repoPath, this.configuration.packagesFolder);
+    var nugetPath = this.utils.strFormat('{0}\\nuget', this.currentPath);
     var series = [];
+
     for (var i = 0, package; package = packages[i]; i++) {
-        series.push(spawnTask(nugetPath, ['install', package, '-OutputDirectory', packagesDirPath] ));
+        series.push(spawnTask(nugetPath, ['install', package.$.id, '-OutputDirectory', packagesFolder] ));
     }
-    series.push(resolveTask);
+    
+    series.push(function(lastOne) {
+        resolveTask();
+        lastOne();
+    });
+
     async.series(series);
 }
 
@@ -70,7 +77,7 @@ function eventTask(task, onTaskEnd) {
         });
 
         task();
-    };
+    }.bind(this);
 }
 
 function taskOrDefault(shouldRun, task) {
@@ -102,9 +109,8 @@ function getFilteredPackages() {
 }
 
 function prepareFirstEnvironment() {
-    console.log('Current Path is: ' + this.currentPath);
     var solutionPath = this.utils.getSolutionFile(this.configuration.mainProjectPath);
-    var packagesFolder = this.utils.searchForFolder(this.configuration.mainProjectPath, 'packages');
+    var packagesFolder = this.utils.searchForFolder(this.configuration.mainProjectPath, this.configuration.packagesFolder);
     async.series([
         nodeTask(changeDir, this.configuration.mainProjectPath),
         execCommandTask(gitResetCmd),
@@ -121,9 +127,8 @@ function prepareFirstEnvironment() {
 
 function prepareSecondEnvironment() {
     var solutionPath = this.utils.getSolutionFile(this.arguments.repoPath);
-    var packagesFolder = this.utils.searchForFolder(this.arguments.repoPath, 'packages');
-    // var packagesConfigPath = this.utils.getPackagesConfigFile(args.repoPath);
-    // var packagesDirPath = this.utils.searchForFolder(repoPath, args.packagesFolder);
+    var packagesFolder = this.utils.searchForFolder(this.arguments.repoPath, this.configuration.packagesFolder);
+    var packagesConfigPath = this.utils.getPackagesConfigFile(this.arguments.repoPath);
     async.series([
         secondEnvironmentStater.bind(this),
         nodeTask(changeDir, this.arguments.repoPath),
@@ -131,10 +136,10 @@ function prepareSecondEnvironment() {
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
         execCommandTask(gitSwitchBranchCmd.bind(this), this.arguments.repoBranch),
-        execCommandTask(cleanPackagesCmd.bind(this, packagesFolder)),
+        taskOrDefault(!!packagesFolder, execCommandTask(cleanPackagesCmd.bind(this, packagesFolder))),
         execCommandTask(gitPullCmd),
-        taskOrDefault(!this.arguments.shouldUpdatePackages, spawnTask(this.utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath])),
-        //taskOrDefault(this.arguments.shouldUpdatePackages, eventTask(filterPackages.bind(this), executePackagesToUpdate.bind(this, packagesDirPath))),
+        spawnTask(this.utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath]),
+        taskOrDefault(this.arguments.shouldUpdatePackages, eventTask.call(this, this.packagesReader.filterPackagesConfigByRegExp.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this))),
         spawnTask(this.configuration.buildCommand, [solutionPath, "/rebuild"]),
         onSecondEnvironmentFinished.bind(this)
     ]);

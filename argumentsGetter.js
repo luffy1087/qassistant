@@ -20,12 +20,12 @@ function argumentsGetter(cfg) {
 
 function interactiveArgumentsGetter(cfg) {
     var questions = [
-        { n:'mainRepoBranch', q:'Which is the branch name of the main project?\n', isBool: false },
-        { n:'canRemovePackagesMainRepo', q:'Should I remove packages from the main project? y/n\n', isBool: true },
-        { n:'repoBranch', q:'Which is the brach name of the second project?\n', isBool: false, shouldAsk: cfg.patternOrPath.indexOf('{0}') > -1 },
-        { n:'shouldUpdatePackages', q:'Should I update packages for the second project? y/n\n', isBool: true },
-        { n:'placeholderValueOrEmpty', q:'Type the value for the placeholder to build the path for the second project.\n', isBool: false },
-        { n:'dlls', q:'type a commna-saparated list of dlls to move.\n', isBool: false }
+        { n:'mainRepoBranch', q:'Which is the branch name of the main project?\n\n', isBool: false },
+        { n:'canRemovePackagesMainRepo', q:'\nShould I remove packages from the main project? y/n\n\n', isBool: true },
+        { n:'repoBranch', q:'\nWhich is the brach name of the second project?\n\n', isBool: false, shouldAsk: cfg.patternOrPath.indexOf('{0}') > -1 },
+        { n:'shouldUpdatePackages', q:'\nShould I update packages for the second project? y/n\n\n', isBool: true },
+        { n:'placeholderValueOrEmpty', q:'\nType the value for the placeholder to build the path for the second project.\n\n', isBool: false },
+        { n:'dlls', q:'\ntype a commna-saparated list of dlls to move.\n\n', isBool: false }
     ];
 
     var questionsObject = questions.reduce(function(accumulator, current) {
