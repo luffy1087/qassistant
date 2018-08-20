@@ -65,4 +65,22 @@ function getConfig() {
     getBuildCommand.call(this);
 }
 
-module.exports = getConfig;
+function trySetPreviousStatus(args, cfg) {
+    var prevStatus = this.utils.strFormat('{0}-{1}', args.mainRepoBranch, args.canRemovePackagesMainRepo).toLowerCase();
+
+    if (prevStatus === cfg.prevStatus) { return; }
+    
+    cfg.prevStatus = prevStatus;
+
+    fs.writeFileSync('./configure.json', cfg);
+
+    this.eventEmitter.emit('onPreviousStatusSet');
+}
+
+function Configure() {
+    
+}
+
+Configure.prototype.getConfig = getConfig;
+Configure.prototype.trySetPreviousStatus = trySetPreviousStatus;
+module.exports = new Configure();

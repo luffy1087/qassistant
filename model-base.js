@@ -1,5 +1,5 @@
 var EventEmitter = require('events')
-  , getConfig = require('./configure')
+  , config = require('./configure')
   , argumentsGetter = require('./argumentsGetter')
   , utils = require('./utils');
 
@@ -12,9 +12,10 @@ function onConfigurationLoaded(cfg) {
 
 function ModelBase() {
     this.eventEmitter.once('onConfigurationCreated', onConfigurationLoaded.bind(this));
-    getConfig.call(this);
+    config.getConfig.call(this);
 }
 
 ModelBase.prototype.eventEmitter = new EventEmitter();
 ModelBase.prototype.utils = utils;
+ModelBase.prototype.config = { trySetPreviousStatus: config.trySetPreviousStatus.bind(config) };
 module.exports = ModelBase;

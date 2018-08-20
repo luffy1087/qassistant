@@ -37,6 +37,7 @@ function interactiveArgumentsGetter(cfg) {
         return accumulator;
     }, {});
     
+    questionsObject.prevStatus = this.utils.strFormat('{0}-{1}', questionsObject.mainRepoBranch, questionsObject.canRemovePackagesMainRepo);
     questionsObject.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, questionsObject.placeholderValueOrEmpty);
 
     return questionsObject;
