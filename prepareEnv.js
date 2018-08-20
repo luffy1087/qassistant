@@ -92,12 +92,18 @@ function taskOrDefault(shouldRun, task) {
 
 function onFirstEnvironmentFinished(resolveTask) {
     this.eventEmitter.emit('onFirstEnvironmentFinished');
-    resolveTask();
+    
+    if (resolveTask) {
+        resolveTask();
+    }
 }
 
 function onSecondEnvironmentFinished(resolveTask) {
     this.eventEmitter.emit('onSecondEnvironmentFinished');
-    resolveTask();
+    
+    if (resolveTask) {
+        resolveTask();
+    }
 }
 
 function secondEnvironmentStater(resolveTask) {
@@ -109,6 +115,10 @@ function getFilteredPackages() {
 }
 
 function prepareFirstEnvironment() {
+    if (!this.arguments.canBuildMainProject) {
+        return void onFirstEnvironmentFinished();
+    }
+
     var solutionPath = this.utils.getSolutionFile(this.configuration.mainProjectPath);
     var packagesFolder = this.utils.searchForFolder(this.configuration.mainProjectPath, this.configuration.packagesFolder);
     async.series([

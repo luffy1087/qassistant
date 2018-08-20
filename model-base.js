@@ -17,5 +17,4 @@ function ModelBase() {
 
 ModelBase.prototype.eventEmitter = new EventEmitter();
 ModelBase.prototype.utils = utils;
-ModelBase.prototype.config = { trySetPreviousStatus: config.trySetPreviousStatus.bind(config) };
 module.exports = ModelBase;

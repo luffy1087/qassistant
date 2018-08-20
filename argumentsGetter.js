@@ -19,9 +19,11 @@ function argumentsGetter(cfg) {
 }
 
 function interactiveArgumentsGetter(cfg) {
+    
+    var canBuildMainProject = readline.question('Can build main project? y/n\n\n') === 'y';
     var questions = [
-        { n:'mainRepoBranch', q:'Which is the branch name of the main project?\n\n', isBool: false },
-        { n:'canRemovePackagesMainRepo', q:'\nShould I remove packages from the main project? y/n\n\n', isBool: true },
+        { n:'mainRepoBranch', q:'\nWhich is the branch name of the main project?\n\n', isBool: false, shouldAsk: canBuildMainProject },
+        { n:'canRemovePackagesMainRepo', q:'\nShould I remove packages from the main project? y/n\n\n', isBool: true, shouldAsk: canBuildMainProject },
         { n:'repoBranch', q:'\nWhich is the brach name of the second project?\n\n', isBool: false, shouldAsk: cfg.patternOrPath.indexOf('{0}') > -1 },
         { n:'shouldUpdatePackages', q:'\nShould I update packages for the second project? y/n\n\n', isBool: true },
         { n:'placeholderValueOrEmpty', q:'\nType the value for the placeholder to build the path for the second project.\n\n', isBool: false },
@@ -37,7 +39,7 @@ function interactiveArgumentsGetter(cfg) {
         return accumulator;
     }, {});
     
-    questionsObject.prevStatus = this.utils.strFormat('{0}-{1}', questionsObject.mainRepoBranch, questionsObject.canRemovePackagesMainRepo);
+    questionsObject.canBuildMainProject = canBuildMainProject;
     questionsObject.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, questionsObject.placeholderValueOrEmpty);
 
     return questionsObject;
