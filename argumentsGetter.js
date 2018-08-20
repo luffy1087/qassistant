@@ -6,8 +6,9 @@ function argumentsGetter(cfg) {
     if (numberOfArgumets == 0) {
         return interactiveArgumentsGetter.call(this, cfg);
     }
-    //node index.js -y "development" -c "y" -s "master" -u "y" -p "VALENTINO" -d "Cart,Item"
+    //node index.js -f "y" -y "development" -c "y" -s "master" -u "y" -p "VALENTINO" -d "Cart,Item"
     return {
+        canBuildMainProject: args['f'],
         mainRepoBranch: args['y'],
         canRemovePackagesMainRepo: args['c'] === 'y',
         repoBranch: args['s'],
@@ -20,7 +21,7 @@ function argumentsGetter(cfg) {
 
 function interactiveArgumentsGetter(cfg) {
     
-    var canBuildMainProject = readline.question('Can build main project? y/n\n\n') === 'y';
+    var canBuildMainProject = readline.question('Can build main project? y/n. default: y \n\n') !== 'n';
     var questions = [
         { n:'mainRepoBranch', q:'\nWhich is the branch name of the main project?\n\n', isBool: false, shouldAsk: canBuildMainProject },
         { n:'canRemovePackagesMainRepo', q:'\nShould I remove packages from the main project? y/n\n\n', isBool: true, shouldAsk: canBuildMainProject },
