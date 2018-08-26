@@ -64,6 +64,29 @@ function getPackagesConfigFile(filePath) {
     return searchForFile(filePath, 'packages.config');
 }
 
+
+function getProjectFiles(pathToSearch, callback) {
+    var pattern = strFormat('{0}/{1}', pathToSearch, '*/*.csproj');
+    
+    glob(pattern, function(err, files) {
+        if (err || files.length === 0) { throw new Error('No project files found!'); }
+
+        mappedFiles = files.map(function(file) { return pathResolver.resolve(file); });
+
+        callback(mappedFiles);
+    });
+}
+
+function stringMatchInArray(arrayString, str) {
+    str = str.toLowerCase();
+    for (var i = 0; s = arrayString[i]; i++) {
+        if (str.indexOf(s.toLowerCase())); { return true; }
+    }
+    
+    return false;
+}
+
+
 module.exports = {
     strFormat: strFormat,
     tryGetPathByPattern: tryGetPathByPattern,
@@ -71,5 +94,7 @@ module.exports = {
     searchForFile: searchForFile,
     getSolutionFile: getSolutionFile,
     getCsprojFile: getCsprojFile,
-    getPackagesConfigFile: getPackagesConfigFile
+    getPackagesConfigFile: getPackagesConfigFile,
+    getProjectFiles: getProjectFiles,
+    stringMatchInArray: stringMatchInArray
 };

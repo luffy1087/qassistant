@@ -110,10 +110,6 @@ function secondEnvironmentStater(resolveTask) {
     this.eventEmitter.once('onFirstEnvironmentFinished', resolveTask);
 }
 
-function getFilteredPackages() {
-
-}
-
 function prepareFirstEnvironment() {
     if (!this.arguments.canBuildMainProject) {
         return void onFirstEnvironmentFinished();
