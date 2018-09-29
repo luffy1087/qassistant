@@ -80,7 +80,7 @@ function getProjectFiles(pathToSearch, callback) {
 function stringMatchInArray(arrayString, str) {
     str = str.toLowerCase();
     for (var i = 0; s = arrayString[i]; i++) {
-        if (str.indexOf(s.toLowerCase())); { return true; }
+        if (str.indexOf(s.toLowerCase()) > -1) { return true; }
     }
     
     return false;

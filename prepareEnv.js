@@ -1,5 +1,6 @@
 var commands = require('./commands')
-  , async = require('async');
+  , async = require('async')
+  , referencesFixer = require('./referencesFixer');
 
 function changeDir(path) {
     process.chdir(path);
@@ -60,7 +61,7 @@ function execCommandTask(getCommand) {
     };
 }
 
-function nodeTask(callback) {
+function syncTask(callback) {
     var args = Array.prototype.slice.call(arguments, 1);
 
     return function(resolveTask) {
@@ -118,7 +119,7 @@ function prepareFirstEnvironment() {
     var solutionPath = this.utils.getSolutionFile(this.configuration.mainProjectPath);
     var packagesFolder = this.utils.searchForFolder(this.configuration.mainProjectPath, this.configuration.packagesFolder);
     async.series([
-        nodeTask(changeDir, this.configuration.mainProjectPath),
+        syncTask(changeDir, this.configuration.mainProjectPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
@@ -137,7 +138,7 @@ function prepareSecondEnvironment() {
     var packagesConfigPath = this.utils.getPackagesConfigFile(this.arguments.repoPath);
     async.series([
         secondEnvironmentStater.bind(this),
-        nodeTask(changeDir, this.arguments.repoPath),
+        syncTask(changeDir, this.arguments.repoPath),
         execCommandTask(gitResetCmd),
         execCommandTask(gitCleanChangesCmd),
         execCommandTask(gitCleanDirectoryCmd),
@@ -146,6 +147,7 @@ function prepareSecondEnvironment() {
         execCommandTask(gitPullCmd),
         spawnTask(this.utils.strFormat('{0}\\nuget', this.currentPath), ['restore', solutionPath]),
         taskOrDefault(this.arguments.shouldUpdatePackages, eventTask.call(this, this.packagesReader.filterPackagesConfigByRegExp.bind(this, packagesConfigPath), executePackagesToUpdate.bind(this))),
+        //ReferenceFixer
         spawnTask(this.configuration.buildCommand, [solutionPath, "/rebuild"]),
         onSecondEnvironmentFinished.bind(this)
     ]);
