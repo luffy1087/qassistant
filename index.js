@@ -1,12 +1,9 @@
 //Dependencies
-var ModelBase = require('./model-base');
-var Base = require('./base');
-var PrepareEnv = require('./prepareEnv');
+var ModuleBase = require('./base/base-module');
+var PrepareEnv = require('./lib/prepareEnv');
 //Inheritance
-var modelBase = new ModelBase();
-Base.prototype = modelBase;
-var baseModule = new Base();
-PrepareEnv.prototype = baseModule;
+var ModuleBase = new ModuleBase();
+PrepareEnv.prototype = ModuleBase;
 //Initialize modules
 var prepareEnvironment = new PrepareEnv();
 //Start program

@@ -1,5 +1,6 @@
 var args = require('optimist').argv
-  , readline = require('readline-sync');
+  , readline = require('readline-sync')
+  , utils = require('./utils/utils');
 
 function argumentsGetter(cfg) {
     var numberOfArgumets = Object.keys(args).length - 2;
@@ -15,7 +16,7 @@ function argumentsGetter(cfg) {
         shouldUpdatePackages: args['u'] === 'y',
         placeholderValueOrEmpty: args["p"],
         dlls: args["d"],
-        repoPath: this.utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
+        repoPath: utils.tryGetPathByPattern(cfg.patternOrPath, args["p"])
     };
 }
 
@@ -41,7 +42,7 @@ function interactiveArgumentsGetter(cfg) {
     }, {});
     
     questionsObject.canBuildMainProject = canBuildMainProject;
-    questionsObject.repoPath = this.utils.tryGetPathByPattern(cfg.patternOrPath, questionsObject.placeholderValueOrEmpty);
+    questionsObject.repoPath = utils.tryGetPathByPattern(cfg.patternOrPath, questionsObject.placeholderValueOrEmpty);
 
     return questionsObject;
 }

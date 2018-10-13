@@ -65,9 +65,7 @@ function getConfig() {
     getBuildCommand.call(this);
 }
 
-function Configure() {
-    
-}
+function Configure() { }
 
 Configure.prototype.getConfig = getConfig;
 module.exports = new Configure();
