@@ -48,11 +48,10 @@ function onBuildCommandFound(buildCommand) {
 
 function createConfigurationJson(buildCommand) {
     return {
-        mainProjectPath: askPath('mainProjectPath'),
-        patternOrPath: askPath('patternOrPath (e.g: C:\\projects\\{0}\\Src)'),
+        mainSolution: askPath('\nType the path of the main mainSolution\n\n'),
+        solutionPatternOrPath: askPath('type the other solution path or pattern containing the placeholders (e.g: C:\\projects\\{0}\\Src)'),
         buildCommand: buildCommand,
-        packagesFolder: 'packages',
-        filterRegExp: 'F31\\.*'
+        packagesFolder: 'packages'
     };
 }
 
