@@ -1,6 +1,6 @@
 var args = require('optimist').argv
   , readline = require('readline-sync')
-  , utils = require('./utils/utils');
+  , utils = require('../utils/utils');
 
 function argumentsGetter(cfg) {
     var numberOfArgumets = Object.keys(args).length - 2;
