@@ -1,6 +1,6 @@
 var EventEmitter = require('events')
-  , config = require('./cfg/configure')
-  , argumentsGetter = require('./base/argumentsGetter');
+  , config = require('../cfg/configure')
+  , argumentsGetter = require('./argumentsGetter');
 
 function onConfigurationLoaded(cfg) {
     this.configuration = cfg;
