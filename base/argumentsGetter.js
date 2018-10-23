@@ -22,13 +22,13 @@ function argumentsGetter(cfg) {
 
 function interactiveArgumentsGetter(cfg) {
     
-    var canBuildMainSolution = readline.question('Can build main solusion? y/n. default: y \n\n') !== 'n';
+    var canBuildMainSolution = readline.question('\nCan build main solusion? y/n. default: y \n') !== 'n';
     var questions = [
-        { p:'mainSolutionBranch', q:'\nWhich is the branch name of the main solution?\n\n', shouldAsk: canBuildMainSolution },
-        { p:'solutionBranch', q:'\nWhich is the brach name of the second solution?\n\n' },
-        { p:'shouldUpdatePackages', q:'\nShould I update packages for the second solution? y/n\n\n', isBool: true },
-        { p:'solutionPlaceholder', q:'\nType the value for the placeholder to build the path for the second solution.\n\n', shouldAsk: cfg.solutionPatternOrPath.indexOf('{0}') > -1},
-        { p:'dlls', q:'\ntype a commna-saparated list of dlls to move.\n\n' }
+        { p:'mainSolutionBranch', q:'\nWhich is the branch name of the main solution?\n', shouldAsk: canBuildMainSolution },
+        { p:'solutionBranch', q:'\nWhich is the brach name of the second solution?\n' },
+        { p:'shouldUpdatePackages', q:'\nShould I update packages for the second solution? y/n\n', isBool: true },
+        { p:'solutionPlaceholder', q:'\nType the value for the placeholder to build the path for the second solution.\n', shouldAsk: cfg.solutionPatternOrPath.indexOf('{0}') > -1},
+        { p:'dlls', q:'\ntype a commna-saparated list of dlls to move.\n' }
     ];
 
     var answersObject = questions.reduce(function(accumulator, currentQuestion) {
@@ -36,7 +36,7 @@ function interactiveArgumentsGetter(cfg) {
             return accumulator;
         }
         
-        var answer = +readline.question(currentQuestion.q);
+        var answer = readline.question(currentQuestion.q);
         accumulator[currentQuestion.p] = currentQuestion.isBool ? answer === 'y' : answer.trim();
         
         return accumulator;

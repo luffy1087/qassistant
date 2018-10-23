@@ -57,7 +57,7 @@ function createConfigurationJson(buildCommand) {
 
 function getConfig() {
     if (fs.existsSync('./cfg/configure.json')) {
-        return void this.eventEmitter.emit('onConfigurationCreated', require('./cfg/configure.json'));
+        return void this.eventEmitter.emit('onConfigurationCreated', require('./configure.json'));
     }
     
     this.eventEmitter.once('onBuildCommandFound', onBuildCommandFound.bind(this));
