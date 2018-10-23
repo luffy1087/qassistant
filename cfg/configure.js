@@ -4,7 +4,7 @@ var fs = require('fs')
 
 function askPath(type) {
     do {
-        var path = readline.question('type the full path of the ' + type + '\n');
+        var path = readline.question('\ntype the ' + type + '\n');
         if (!path.match(/\{0\}/) && !fs.existsSync(path)) {
             console.log('The path does not exist');
             continue;
@@ -41,23 +41,23 @@ function onRegistryValues(err, items) {
 function onBuildCommandFound(buildCommand) {
     var json = createConfigurationJson(buildCommand);
 
-    fs.writeFileSync('configure.json', JSON.stringify(json));
+    fs.writeFileSync('./cfg/configure.json', JSON.stringify(json));
 
     this.eventEmitter.emit('onConfigurationCreated', json);
 }
 
 function createConfigurationJson(buildCommand) {
     return {
-        mainSolution: askPath('\nType the path of the main mainSolution\n\n'),
-        solutionPatternOrPath: askPath('type the other solution path or pattern containing the placeholders (e.g: C:\\projects\\{0}\\Src)'),
+        mainSolution: askPath('mainSolution path'),
+        solutionPatternOrPath: askPath('path or pattern containing the placeholders (e.g: C:\\projects\\{0}\\Src)'),
         buildCommand: buildCommand,
         packagesFolder: 'packages'
     };
 }
 
 function getConfig() {
-    if (fs.existsSync('./configure.json')) {
-        return void this.eventEmitter.emit('onConfigurationCreated', require('./configure.json'));
+    if (fs.existsSync('./cfg/configure.json')) {
+        return void this.eventEmitter.emit('onConfigurationCreated', require('./cfg/configure.json'));
     }
     
     this.eventEmitter.once('onBuildCommandFound', onBuildCommandFound.bind(this));
