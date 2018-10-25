@@ -9,7 +9,7 @@ function argumentsGetter(cfg) {
     }
     //node index.js -f "y" -y "development" -c "y" -s "master" -u "y" -p "VALENTINO" -d "Cart,Item"
     return {
-        canBuildMainSolution: args['f'],
+        canBuildMainSolution: args['f'] !== 'n',
         mainSolutionBranch: args['y'],
         canRemovePackagesMainRepo: args['c'] === 'y',
         solutionBranch: args['s'],
@@ -22,7 +22,7 @@ function argumentsGetter(cfg) {
 
 function interactiveArgumentsGetter(cfg) {
     
-    var canBuildMainSolution = readline.question('\nCan build main solusion? y/n. default: y \n') !== 'n';
+    var canBuildMainSolution = readline.question('\nCan build main solusion? y/n. default: y \n').toString().trim() !== 'n';
     var questions = [
         { p:'mainSolutionBranch', q:'\nWhich is the branch name of the main solution?\n', shouldAsk: canBuildMainSolution },
         { p:'solutionBranch', q:'\nWhich is the brach name of the second solution?\n' },

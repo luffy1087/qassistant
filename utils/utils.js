@@ -41,7 +41,7 @@ function searchForFolder(filePath, folderName) {
 
 function searchForFile(filePath, regFileName) {
     var currentPath = filePath.split('\\');
-    for (var i = currentPath.length, files; i > 0; i--) {
+    for (var i = currentPath.length, newPath, files; i > 0; i--) {
         newPath = currentPath.slice(0, i).join('\\');
         files = glob.sync(strFormat('{0}\\{1}', newPath, regFileName));
         if (files && files.length > 0) {
@@ -49,7 +49,7 @@ function searchForFile(filePath, regFileName) {
         }
     }
 
-    throw new Error('WARNING: searchForFile did not find any files');
+    throw new Error('ERROR: searchForFile did not find any files');
 }
 
 function getSolutionFile(filePath) {
