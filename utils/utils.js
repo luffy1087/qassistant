@@ -66,7 +66,7 @@ function getPackagesConfigFile(filePath) {
 
 
 function getProjectFiles(pathToSearch, callback) {
-    var pattern = strFormat('{0}/{1}', pathToSearch, '*/*.csproj');
+    var pattern = strFormat('{0}/{1}', pathToSearch, '**/*.csproj');
     
     glob(pattern, function(err, files) {
         if (err || files.length === 0) { throw new Error('No project files found!'); }
