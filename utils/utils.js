@@ -86,6 +86,10 @@ function stringMatchInArray(arrayString, str) {
     return false;
 }
 
+function wrapPath(path) {
+    return strFormat('"{0}"', path);
+}
+
 
 module.exports = {
     strFormat: strFormat,
@@ -96,5 +100,6 @@ module.exports = {
     getCsprojFile: getCsprojFile,
     getPackagesConfigFile: getPackagesConfigFile,
     getProjectFiles: getProjectFiles,
-    stringMatchInArray: stringMatchInArray
+    stringMatchInArray: stringMatchInArray,
+    wrapPath: wrapPath
 };
