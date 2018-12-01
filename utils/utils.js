@@ -90,6 +90,23 @@ function wrapPath(path) {
     return strFormat('"{0}"', path);
 }
 
+function referenceInfoToObject(includeString) {
+    var info = includeString.split(',') || [];
+    var objectToReturn = {};
+    for (var i = 0, currentInfo, equalsSignIndex; currentInfo = info[i]; i++) {
+        currentInfo = currentInfo.trim();
+        if (currentInfo.indexOf('=') === -1) {
+            objectToReturn.Dll = currentInfo;
+            continue;
+        }
+
+        equalsSignIndex = currentInfo.indexOf("=");
+        objectToReturn[currentInfo.substring(0, equalsSignIndex)] = currentInfo.substring(equalsSignIndex+1);
+    }
+
+    return objectToReturn;
+}
+
 
 module.exports = {
     strFormat: strFormat,
@@ -101,5 +118,6 @@ module.exports = {
     getPackagesConfigFile: getPackagesConfigFile,
     getProjectFiles: getProjectFiles,
     stringMatchInArray: stringMatchInArray,
-    wrapPath: wrapPath
+    wrapPath: wrapPath,
+    referenceInfoToObject: referenceInfoToObject
 };
