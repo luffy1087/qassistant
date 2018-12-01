@@ -92,13 +92,13 @@ function wrapPath(path) {
 
 function referenceInfoToObject(includeString) {
     var info = includeString.split(',') || [];
-    var objectToReturn = {};
-    for (var i = 0, currentInfo, equalsSignIndex; currentInfo = info[i]; i++) {
+    var objectToReturn = { Dll: info[0].trim() };
+    
+    for (var i = 1, currentInfo, equalsSignIndex; currentInfo = info[i]; i++) {
         currentInfo = currentInfo.trim();
-        if (currentInfo.indexOf('=') === -1) {
-            objectToReturn.Dll = currentInfo;
-            continue;
-        }
+        equalsSignIndex = currentInfo.indexOf("=");
+        
+        if (equalsSignIndex === -1) { continue; }
 
         equalsSignIndex = currentInfo.indexOf("=");
         objectToReturn[currentInfo.substring(0, equalsSignIndex)] = currentInfo.substring(equalsSignIndex+1);
