@@ -41,7 +41,7 @@ function onRegistryValues(err, items) {
 function onBuildCommandFound(buildCommand) {
     var json = createConfigurationJson(buildCommand);
 
-    fs.writeFileSync('./cfg/configure.json', JSON.stringify(json));
+    fs.writeFileSync('./cfg/configure.json', JSON.stringify(json, null, 2));
 
     this.eventEmitter.emit('onConfigurationCreated', json);
 }
