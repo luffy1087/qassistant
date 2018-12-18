@@ -107,6 +107,20 @@ function referenceInfoToObject(includeString) {
     return objectToReturn;
 }
 
+function checkBeforePushing(arr, value) {
+    if (arr.indexOf(value) > -1) {
+        return;
+    }
+
+    arr.push(value);
+}
+
+function checkBeforeArrayConcatenating(source, destination) {
+    destination = destination || [];
+
+    destination.forEach(function(value) {  checkBeforePushing(source, value); });
+}
+
 
 module.exports = {
     strFormat: strFormat,
@@ -119,5 +133,7 @@ module.exports = {
     getProjectFiles: getProjectFiles,
     stringMatchInArray: stringMatchInArray,
     wrapPath: wrapPath,
-    referenceInfoToObject: referenceInfoToObject
+    referenceInfoToObject: referenceInfoToObject,
+    checkBeforePushing: checkBeforePushing,
+    checkBeforeArrayConcatenating: checkBeforeArrayConcatenating
 };
