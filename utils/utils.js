@@ -71,7 +71,7 @@ function getProjectFiles(pathToSearch, callback) {
     glob(pattern, { "ignore": [ '*.Test.csproj' ] }, function(err, files) {
         if (err || files.length === 0) { throw new Error('No project files found!'); }
 
-        mappedFiles = files.map(function(file) { return pathResolver.resolve(file); }).filter(function(file) {  return file.indexOf('node_modules') === -1 && !file.match(/(Test)/i); });
+        var mappedFiles = files.map(function(file) { return pathResolver.resolve(file); }).filter(function(file) {  return file.indexOf('node_modules') === -1 && !file.match(/(Test)/i); });
 
         callback(mappedFiles);
     });
