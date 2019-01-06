@@ -74,7 +74,6 @@ function onGettingFiles(env, dlls, resolve, files) {
     
     var promises = [];
     for (var i = 0; file = files[i]; i++) {
-        this.loadedFiles[file] = 0;
         promises.push(new Promise(function(resolve, reject) { getXml.call(this, file, resolve, null, reject); }.bind(this)));
     }
     
