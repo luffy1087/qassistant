@@ -56,15 +56,6 @@ function getSolutionFile(filePath) {
     return searchForFile(filePath, '*.sln');
 }
 
-function getCsprojFile(filePath) {
-    return searchForFile(filePath, '*.csproj');
-}
-
-function getPackagesConfigFile(filePath) {
-    return searchForFile(filePath, 'packages.config');
-}
-
-
 function getProjectFiles(pathToSearch, callback) {
     var pattern = strFormat('{0}/{1}', pathToSearch, '**/*.csproj');
     
@@ -84,10 +75,6 @@ function stringMatchInArray(arrayString, str) {
     }
     
     return false;
-}
-
-function wrapPath(path) {
-    return strFormat('"{0}"', path);
 }
 
 function referenceInfoToObject(includeString) {
@@ -141,7 +128,6 @@ module.exports = {
     getPackagesConfigFile: getPackagesConfigFile,
     getProjectFiles: getProjectFiles,
     stringMatchInArray: stringMatchInArray,
-    wrapPath: wrapPath,
     referenceInfoToObject: referenceInfoToObject,
     checksAndPush: checksAndPush,
     inArray: inArray,
