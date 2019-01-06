@@ -1,8 +1,7 @@
 var fs = require('fs')
   , xmldom = require('xmldom')
   , utils = require('../utils/utils')
-  , path = require('path')
-  , loadXml = require('./loadXml');
+  , loadCsproj = require('./iom/loadCsproj');
 
 /* Region Get Files And Return Xml  */
 
@@ -17,56 +16,6 @@ function onReceivingXmls(env, resolve, xmls) {
     resolve();
 }
 
-function getDependenciesByXml(xmlDoc) {
-    var xmlDependencies = xmlDoc.documentElement.getElementsByTagName('ProjectReference');
-
-    if (xmlDependencies.length === 0) { return []; }
-
-    for (var i = 0, sibling, dependencies = []; sibling = xmlDependencies.item(i); i++) {
-        dependencies.push(sibling.getAttribute('Include'));
-    }
-
-    return dependencies;
-}
-
-function getXml(file, resolveMaster, resolveCurrent, reject, counter) {
-    fs.readFile(file, function(err, result) {
-        if (err) {
-            reject();
-            throw new Error('Xml File not found');
-        }
-        counter = counter || 0;
-        counter--;
-        var csprojFiles = this.csprojFiles;
-        var xmlDoc = new xmldom.DOMParser().parseFromString(result.toString(), 'text/xml');
-        var xmlAssemblyName = xmlDoc.documentElement.getElementsByTagName('AssemblyName')[0];
-        var assemblyName  = xmlAssemblyName ? xmlAssemblyName.firstChild.nodeValue : '';
-        var assemblyProjPath = path.dirname(file);
-        var assemblyProjFile = path.basename(file);
-        var dependencies = getDependenciesByXml(xmlDoc);
-        var filteredDependencies = dependencies.filter(function(projFile) { return csprojFiles.indexOf(path.basename(projFile)) === -1; });
-        var dependenciesProjFiles = dependencies.map(function(projFile) { return path.basename(projFile); });
-        
-        utils.checkBeforePushing(csprojFiles, assemblyProjFile);
-        
-        filteredDependencies.forEach(function(projFile) { new Promise(function(resolve, reject) { getXml.call(this, utils.strFormat('{0}\\{1}', assemblyProjPath, projFile), resolveMaster, resolve, reject, counter); }.bind(this)); }.bind(this));
-
-        utils.checkBeforeArrayConcatenating(csprojFiles, dependenciesProjFiles);
-
-        if ((counter + this.csprojFiles.length) === 0) {
-            console.log('Everything is loaded');
-            return void resolveMaster({ proj: file, projPath: assemblyProjPath, xmlDoc: xmlDoc, assemblyName: assemblyName });
-        }
-
-        if (resolveCurrent) {
-            console.log(assemblyName + ' is loaded');
-            resolveCurrent({ proj: file, projPath: assemblyProjPath, xmlDoc: xmlDoc, assemblyName: assemblyName });
-        }
-
-        counter -= filteredDependencies.length;
-    }.bind(this));
-}
-
 function onGettingFiles(env, dlls, resolve, files) {
     if (dlls && dlls.constructor === Array && dlls.length > 0) {
         files = files.filter(function(file) { return utils.stringMatchInArray(dlls, file); }, this);
@@ -74,7 +23,7 @@ function onGettingFiles(env, dlls, resolve, files) {
     
     var promises = [];
     for (var i = 0; file = files[i]; i++) {
-        promises.push(new Promise(function(resolve, reject) { getXml.call(this, file, resolve, null, reject); }.bind(this)));
+        promises.push(new Promise(function(resolve, reject) { new loadCsproj(file, resolve, reject); }));
     }
     
     Promise.all(promises).then(onReceivingXmls.bind(this, env, resolve));

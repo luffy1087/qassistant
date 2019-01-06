@@ -119,6 +119,18 @@ function checksAndPush(arr, value) {
     arr.push(value);
 }
 
+function removeBackDirs(path1, path2) {
+    var splittedPath1 = path1.split('\\');
+    var splittedPath2 = path2.split('\\');
+
+    while (splittedPath2[0] === '..') {
+        splittedPath1.splice(splittedPath1.length-1, 1);
+        splittedPath2.splice(0, 1);
+    }
+
+    return strFormat("{0}\\{1}", splittedPath1.join('\\'), splittedPath2.join('\\'));
+}
+
 module.exports = {
     strFormat: strFormat,
     tryGetPathByPattern: tryGetPathByPattern,
@@ -132,5 +144,6 @@ module.exports = {
     wrapPath: wrapPath,
     referenceInfoToObject: referenceInfoToObject,
     checksAndPush: checksAndPush,
-    inArray: inArray
+    inArray: inArray,
+    removeBackDirs: removeBackDirs
 };
